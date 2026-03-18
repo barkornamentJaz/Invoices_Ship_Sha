@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval';"/>
 <title>Sha &amp; Sha — Invoice Management</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -247,34 +246,24 @@ tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
-// CONFIG — your Apps Script Web App URL
-// ═══════════════════════════════════════
-const API = 'https://script.google.com/macros/s/AKfycbwgeSwmD5cztvEKfxDv6oH7shKAZzK6_fPioALdowJ2MxrJARQAMSoZna7pT7egYb9i2Q/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzzeOelQ4n5nLBKGzOkXtAUD_O5jJVSI7xXi9z73MXdMfWP7ZRu4GPxCGpKyvNqNxPaDQ/exec';
 
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
 let allData=[], headers=[], filtered=[];
 let currentPage=1, currentView='table';
 let sortField='', sortDir='asc';
 let editingRowNum=null, pendingDeleteRow=null;
 
-// Resort colour map
 const PAL=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899',
   '#06b6d4','#84cc16','#f97316','#6366f1','#14b8a6','#f43f5e','#a855f7',
   '#3b82f6','#22c55e','#e11d48','#7c3aed','#0891b2','#65a30d','#ea580c'];
 const RC={};
-function rc(r){if(!RC[r])RC[r]=PAL[Object.keys(RC).length%PAL.length];return RC[r]}
+function rc(r){if(!RC[r])RC[r]=PAL[Object.keys(RC).length%PAL.length];return RC[r];}
 
-// ═══════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════
 const PAGE_SIZE=30;
-function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function pAmt(v){return parseFloat(String(v??'').replace(/[^0-9.-]/g,''))||0}
-function fAmt(v){const n=pAmt(v);return n?'LKR '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—'}
-function fNum(v){const n=parseFloat(v)||0;return n?n.toLocaleString():'—'}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function pAmt(v){return parseFloat(String(v??'').replace(/[^0-9.-]/g,''))||0;}
+function fAmt(v){const n=pAmt(v);return n?'LKR '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';}
+function fNum(v){const n=parseFloat(v)||0;return n?n.toLocaleString():'—';}
 
 function toast(msg,type='ok'){
   const el=document.getElementById('toast');
@@ -282,7 +271,6 @@ function toast(msg,type='ok'){
   clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',3200);
 }
 
-// Find best matching header key from candidates
 function colKey(...candidates){
   for(const c of candidates){
     const k=headers.find(h=>h.toLowerCase().replace(/[\s_-]/g,'').includes(c.toLowerCase().replace(/[\s_-]/g,'')));
@@ -291,79 +279,52 @@ function colKey(...candidates){
   return headers[0]||'';
 }
 
-// ═══════════════════════════════════════
-// LOAD DATA via JSONP (bypasses CORS)
-// Apps Script must return callback(data)
-// ═══════════════════════════════════════
+// ── LOAD DATA via fetch (follows redirects, works on all devices) ──
 function loadData(){
-  document.getElementById('syncStatus').textContent='Syncing with Google Sheets…';
-  document.getElementById('syncBtn').textContent='⏳ Syncing…';
+  document.getElementById('syncStatus').textContent='Syncing with Google Sheets...';
+  document.getElementById('syncBtn').textContent='Syncing...';
   document.getElementById('syncBtn').disabled=true;
 
-  const cbName='__gs_'+Date.now();
-  const script=document.createElement('script');
-  script.src=API+'?action=getAll&callback='+cbName;
-
-  let done=false;
-  const cleanup=()=>{done=true;try{document.body.removeChild(script)}catch(e){}
-    document.getElementById('syncBtn').textContent='🔄 Refresh';
-    document.getElementById('syncBtn').disabled=false;};
-
-  script.onerror=()=>{
-    if(done)return; cleanup();
-    showConnError();
-  };
-
-  // timeout fallback
-  const timeout=setTimeout(()=>{
-    if(done)return; cleanup();
-    showConnError('Request timed out. Check your Apps Script deployment.');
-  },15000);
-
-  window[cbName]=(data)=>{
-    clearTimeout(timeout);
-    cleanup();
-    if(data.error){showConnError(data.error);return;}
-    headers=data.headers||[];
-    allData=(data.rows||[]).map(r=>{
-      // ensure _row exists
-      return r;
+  fetch(API+'?action=getAll', {method:'GET', redirect:'follow'})
+    .then(r=>r.text())
+    .then(txt=>{
+      let data;
+      const m=txt.match(/^[^(]+\(([\s\S]*)\)\s*;?\s*$/);
+      try{ data=JSON.parse(m?m[1]:txt); }
+      catch(e){ throw new Error('Bad response from Apps Script'); }
+      if(data.error){showConnError(data.error);return;}
+      headers=data.headers||[];
+      allData=data.rows||[];
+      const rk=colKey('resort','customer','client','entity');
+      allData.forEach(r=>{const v=r[rk];if(v)rc(String(v).trim());});
+      buildFilters();applyFilters();
+      const ts=new Date().toLocaleTimeString();
+      document.getElementById('syncStatus').textContent='Synced '+allData.length+' items - '+ts;
+      toast('Loaded '+allData.length+' items from Google Sheets');
+    })
+    .catch(e=>{ showConnError(e.message); })
+    .finally(()=>{
+      document.getElementById('syncBtn').textContent='Refresh';
+      document.getElementById('syncBtn').disabled=false;
     });
-    // seed resort colours
-    const rk=colKey('resort','customer','client','entity');
-    allData.forEach(r=>{const v=r[rk];if(v)rc(String(v).trim())});
-    buildFilters();
-    applyFilters();
-    const ts=new Date().toLocaleTimeString();
-    document.getElementById('syncStatus').textContent=`Synced ${allData.length} items · ${ts}`;
-    toast('✓ Loaded '+allData.length+' items from Google Sheets');
-  };
-
-  document.body.appendChild(script);
 }
 
 function showConnError(msg){
   msg=msg||'Could not reach Google Apps Script.';
   document.getElementById('tableArea').innerHTML=`
     <div class="error-box">
-      <div class="ei">⚠️</div>
+      <div class="ei">&#x26A0;&#xFE0F;</div>
       <h3>Connection Failed</h3>
       <p>${esc(msg)}</p>
-      <p style="margin-top:10px;font-size:13px">
-        <strong>Fix:</strong> Your Apps Script must support <code>callback</code> parameter (JSONP).<br>
-        Make sure you pasted the updated script and redeployed with <strong>Anyone</strong> access.
-      </p>
       <code>${esc(API)}</code>
       <div style="margin-top:16px">
-        <button onclick="loadData()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px">🔄 Retry</button>
+        <button onclick="loadData()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px">Retry</button>
       </div>
     </div>`;
   document.getElementById('syncStatus').textContent='Connection failed';
 }
 
-// ═══════════════════════════════════════
-// BUILD FILTERS
-// ═══════════════════════════════════════
+// ── FILTERS ──
 function buildFilters(){
   const rk=colKey('resort','customer','client','entity');
   const ik=colKey('invoice','bono','bo','no');
@@ -371,200 +332,140 @@ function buildFilters(){
   const invoices=[...new Set(allData.map(r=>String(r[ik]||'').trim()))].filter(Boolean).sort();
   const rf=document.getElementById('resortFilter');
   rf.innerHTML='<option value="">All Resorts</option>';
-  resorts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;rf.appendChild(o)});
+  resorts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;rf.appendChild(o);});
   const ivf=document.getElementById('invoiceFilter');
   ivf.innerHTML='<option value="">All Invoices / BO No.</option>';
-  invoices.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;ivf.appendChild(o)});
+  invoices.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;ivf.appendChild(o);});
 }
 
-// ═══════════════════════════════════════
-// FILTER + SORT
-// ═══════════════════════════════════════
-function handleSearch(){currentPage=1;applyFilters()}
 function applyFilters(){
-  currentPage=1;
-  const q=document.getElementById('searchInput').value.trim().toLowerCase();
-  const res=document.getElementById('resortFilter').value;
-  const inv=document.getElementById('invoiceFilter').value;
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const rf=document.getElementById('resortFilter').value;
+  const ivf=document.getElementById('invoiceFilter').value;
   const rk=colKey('resort','customer','client','entity');
   const ik=colKey('invoice','bono','bo','no');
-  const hasF=q||res||inv;
-  document.getElementById('clearBtn').style.display=hasF?'block':'none';
   filtered=allData.filter(r=>{
-    if(res&&String(r[rk]||'').trim()!==res)return false;
-    if(inv&&String(r[ik]||'').trim()!==inv)return false;
-    if(q&&!Object.values(r).join(' ').toLowerCase().includes(q))return false;
+    if(rf&&String(r[rk]||'').trim()!==rf)return false;
+    if(ivf&&String(r[ik]||'').trim()!==ivf)return false;
+    if(q){const row=Object.values(r).join(' ').toLowerCase();if(!row.includes(q))return false;}
     return true;
   });
-  if(sortField)doSort();
+  if(sortField){
+    filtered.sort((a,b)=>{
+      let av=a[sortField]??'',bv=b[sortField]??'';
+      const an=parseFloat(av),bn=parseFloat(bv);
+      if(!isNaN(an)&&!isNaN(bn)){return sortDir==='asc'?an-bn:bn-an;}
+      return sortDir==='asc'?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+    });
+  }
+  currentPage=1;
   updateStats();
-  if(currentView==='table')renderTable();
-  else renderSummary();
+  document.getElementById('clearBtn').style.display=(q||rf||ivf)?'block':'none';
+  if(currentView==='table')renderTable();else renderSummary();
 }
+
+function handleSearch(){applyFilters();}
 function clearFilters(){
   document.getElementById('searchInput').value='';
   document.getElementById('resortFilter').value='';
   document.getElementById('invoiceFilter').value='';
   applyFilters();
 }
-function handleSort(f){
-  if(sortField===f)sortDir=sortDir==='asc'?'desc':'asc';
-  else{sortField=f;sortDir='asc';}
-  currentPage=1;doSort();renderTable();
-}
-function doSort(){
-  const ak=colKey('amount');
-  filtered.sort((a,b)=>{
-    let av=a[sortField]??'',bv=b[sortField]??'';
-    if(sortField===ak){av=pAmt(av);bv=pAmt(bv);}
-    else if(!isNaN(parseFloat(av))&&!isNaN(parseFloat(bv))){av=parseFloat(av);bv=parseFloat(bv);}
-    if(av<bv)return sortDir==='asc'?-1:1;
-    if(av>bv)return sortDir==='asc'?1:-1;
-    return 0;
-  });
-}
 
-// ═══════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════
 function updateStats(){
-  const ak=colKey('amount'),rk=colKey('resort','customer','client','entity'),ik=colKey('invoice','bono','bo','no');
-  const tot=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
+  const ak=colKey('amount');
+  const rk=colKey('resort','customer','client','entity');
+  const ik=colKey('invoice','bono','bo','no');
+  const total=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
+  const resorts=new Set(filtered.map(r=>String(r[rk]||'').trim()).filter(Boolean));
+  const invs=new Set(filtered.map(r=>String(r[ik]||'').trim()).filter(Boolean));
   document.getElementById('sItems').textContent=filtered.length.toLocaleString();
-  document.getElementById('sAmt').textContent='LKR '+(tot/1000000).toFixed(2)+'M';
-  document.getElementById('sResorts').textContent=[...new Set(filtered.map(r=>r[rk]))].filter(Boolean).length;
-  document.getElementById('sInv').textContent=[...new Set(filtered.map(r=>r[ik]))].filter(Boolean).length;
+  document.getElementById('sAmt').textContent=total?'LKR '+Math.round(total/1000)+'K':'—';
+  document.getElementById('sResorts').textContent=resorts.size;
+  document.getElementById('sInv').textContent=invs.size;
 }
 
-// ═══════════════════════════════════════
-// RENDER TABLE
-// ═══════════════════════════════════════
+// ── TABLE ──
+function sortBy(field){
+  if(sortField===field){sortDir=sortDir==='asc'?'desc':'asc';}
+  else{sortField=field;sortDir='asc';}
+  applyFilters();
+}
+
 function renderTable(){
-  const tp=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
-  if(currentPage>tp)currentPage=tp;
-  const rows=filtered.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
-
-  const rk=colKey('resort','customer','client','entity');
-  const ck=colKey('itemcode','item code','code');
-  const dk=colKey('itemdescription','item description','description','item');
-  const qk=colKey('qty','quantity');
-  const ratk=colKey('rate');
   const ak=colKey('amount');
+  const totalPages=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
+  if(currentPage>totalPages)currentPage=totalPages;
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filtered.slice(start,start+PAGE_SIZE);
 
-  const si=(f)=>sortField!==f?'<span style="opacity:.3;margin-left:2px">↕</span>'
-    :`<span style="color:var(--blue);margin-left:2px">${sortDir==='asc'?'↑':'↓'}</span>`;
-
-  let html=`<div class="twrap"><div class="tscroll"><table>
-    <thead><tr>
-    ${headers.map(h=>`<th onclick="handleSort('${esc(h)}')">${esc(h)} ${si(h)}</th>`).join('')}
-    <th style="min-width:150px;text-align:center">Actions</th>
-    </tr></thead><tbody>`;
-
-  if(!rows.length){
-    html+=`<tr><td colspan="${headers.length+1}"><div class="empty"><div class="ei">🔍</div><p>No items found.</p></div></td></tr>`;
-  } else {
-    rows.forEach(row=>{
-      const resort=String(row[rk]||'').trim();
-      const c=rc(resort);
-      const rn=row._row;
-      if(editingRowNum===rn){
-        html+=`<tr class="erow">`;
-        headers.forEach(h=>{
-          html+=`<td><input class="einp" id="ei_${rn}_${esc(h)}" value="${esc(row[h]??'')}" style="min-width:${h===dk?'160px':'70px'}"/></td>`;
-        });
-        html+=`<td><div class="acts">
-          <button class="bs" onclick="saveEdit(${rn})">💾 Save</button>
-          <button class="bc" onclick="cancelEdit()">✕</button>
-        </div></td></tr>`;
-      } else {
-        html+=`<tr>`;
-        headers.forEach(h=>{
-          const v=row[h]??'';
-          if(h===rk){
-            html+=`<td><div class="rcell"><span class="rdot" style="background:${c}"></span><span class="rname">${esc(v)}</span></div></td>`;
-          } else if(h===ck){
-            const ok=v&&!['no code','no','nocode',''].includes(String(v).toLowerCase().trim());
-            html+=`<td>${ok?`<span class="cbadge">${esc(v)}</span>`:'<span class="cnone">—</span>'}</td>`;
-          } else if(h===ak){
-            html+=`<td class="ar">${fAmt(v)}</td>`;
-          } else if(h===qk||h===ratk){
-            html+=`<td class="nr">${fNum(v)}</td>`;
-          } else {
-            html+=`<td><div class="idesc" title="${esc(v)}">${esc(v)||'—'}</div></td>`;
-          }
-        });
-        html+=`<td><div class="acts">
-          <button class="be" onclick="startEdit(${rn})">✏️ Edit</button>
-          <button class="bd" onclick="openDel(${rn},'${esc(String(row[dk]||row[rk]||'this item').substring(0,50))}')">🗑️ Del</button>
-        </div></td></tr>`;
-      }
-    });
+  if(!filtered.length){
+    document.getElementById('tableArea').innerHTML='<div class="empty"><div class="ei">&#x1F50D;</div><p>No items match your filter.</p></div>';
+    document.getElementById('pagination').innerHTML='';return;
   }
 
-  const tot=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
-  html+=`</tbody>
-    <tfoot><tr>
-      <td colspan="${headers.length}" style="text-align:right;padding-right:14px">
-        Total (${filtered.length.toLocaleString()} items)
-      </td>
-      <td class="ar">LKR ${tot.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>
-    </tr></tfoot>
-  </table></div></div>`;
+  const rk=colKey('resort','customer','client','entity');
+  const ik=colKey('invoice','bono','bo','no');
+  const dk=colKey('description','item','name','product');
 
-  document.getElementById('tableArea').innerHTML=html;
-  renderPagination();
+  const arrow=f=>sortField===f?(sortDir==='asc'?' ▲':' ▼'):'';
+  const thead='<thead><tr>'+headers.map(h=>`<th onclick="sortBy('${esc(h)}')">${esc(h)}${arrow(h)}</th>`).join('')+'<th>Actions</th></tr></thead>';
+
+  const totalAmt=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
+  const tfoot=ak?`<tfoot><tr><td colspan="${headers.length}" style="text-align:right;font-weight:700">Total (filtered):</td><td class="ar">${fAmt(totalAmt)}</td><td></td></tr></tfoot>`:'';
+
+  const tbody='<tbody>'+page.map(r=>{
+    const rn=r._row;
+    const isEdit=editingRowNum===rn;
+    const cells=headers.map(h=>{
+      const v=r[h];
+      if(isEdit)return`<td><input class="einp" id="ei_${rn}_${esc(h)}" value="${esc(v)}"/></td>`;
+      if(h===rk)return`<td><div class="rcell"><div class="rdot" style="background:${rc(String(v||'').trim())}"></div><span class="rname">${esc(v)}</span></div></td>`;
+      if(h===ik)return v?`<td><span class="cbadge">${esc(v)}</span></td>`:`<td><span class="cnone">—</span></td>`;
+      if(h===ak)return`<td class="ar">${fAmt(v)}</td>`;
+      if(h===dk)return`<td><div class="idesc" title="${esc(v)}">${esc(v)}</div></td>`;
+      const n=pAmt(v);
+      if(n&&h!==dk&&String(v).trim()!=='')return`<td class="nr">${fNum(v)}</td>`;
+      return`<td>${esc(v)}</td>`;
+    }).join('');
+    const desc=String(r[dk]||r[headers[0]]||'').trim();
+    const acts=isEdit
+      ?`<td><div class="acts"><button class="bs" onclick="saveEdit(${rn})">Save</button><button class="bc" onclick="cancelEdit()">Cancel</button></div></td>`
+      :`<td><div class="acts"><button class="be" onclick="startEdit(${rn})">Edit</button><button class="bd" onclick="openDel(${rn},'${esc(desc)}')">Del</button></div></td>`;
+    return`<tr class="${isEdit?'erow':''}">${cells}${acts}</tr>`;
+  }).join('')+'</tbody>';
+
+  document.getElementById('tableArea').innerHTML=`<div class="twrap"><div class="tscroll"><table>${thead}${tbody}${tfoot}</table></div></div>`;
+
+  // Pagination
+  let pag='';
+  if(totalPages>1){
+    pag+=`<button class="pg" onclick="goPage(1)" ${currentPage===1?'disabled':''}>&#x00AB;</button>`;
+    pag+=`<button class="pg" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&#x2039;</button>`;
+    const s=Math.max(1,currentPage-2),e=Math.min(totalPages,currentPage+2);
+    for(let i=s;i<=e;i++)pag+=`<button class="pg${i===currentPage?' act':''}" onclick="goPage(${i})">${i}</button>`;
+    pag+=`<button class="pg" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>&#x203A;</button>`;
+    pag+=`<button class="pg" onclick="goPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>&#x00BB;</button>`;
+    pag+=`<span class="pg-info">Page ${currentPage} of ${totalPages} (${filtered.length} items)</span>`;
+  }
+  document.getElementById('pagination').innerHTML=pag;
 }
 
-// ═══════════════════════════════════════
-// PAGINATION
-// ═══════════════════════════════════════
-function renderPagination(){
-  const c=document.getElementById('pagination');
-  const tp=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
-  if(tp<=1){c.innerHTML='';return;}
-  let h='';
-  h+=`<button class="pg" onclick="goP(1)" ${currentPage===1?'disabled':''}>«</button>`;
-  h+=`<button class="pg" onclick="goP(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
-  let s=Math.max(1,currentPage-3),e=Math.min(tp,s+6);
-  if(e-s<6)s=Math.max(1,e-6);
-  for(let p=s;p<=e;p++)h+=`<button class="pg ${p===currentPage?'act':''}" onclick="goP(${p})">${p}</button>`;
-  h+=`<button class="pg" onclick="goP(${currentPage+1})" ${currentPage===tp?'disabled':''}>›</button>`;
-  h+=`<button class="pg" onclick="goP(${tp})" ${currentPage===tp?'disabled':''}>»</button>`;
-  h+=`<span class="pg-info">Page ${currentPage} of ${tp} · ${filtered.length} items</span>`;
-  c.innerHTML=h;
-}
-function goP(p){
-  const tp=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
-  currentPage=Math.max(1,Math.min(tp,p));
-  editingRowNum=null;renderTable();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ═══════════════════════════════════════
-// INLINE EDIT
-// ═══════════════════════════════════════
-function startEdit(rn){editingRowNum=rn;renderTable()}
-function cancelEdit(){editingRowNum=null;renderTable()}
+function goPage(p){currentPage=p;renderTable();}
+function startEdit(rn){editingRowNum=rn;renderTable();}
+function cancelEdit(){editingRowNum=null;renderTable();}
 function saveEdit(rn){
-  const row=allData.find(r=>r._row===rn);
-  if(!row)return;
+  const row=allData.find(r=>r._row===rn);if(!row)return;
   const updated={};
-  headers.forEach(h=>{
-    const inp=document.getElementById(`ei_${rn}_${h}`);
-    if(inp)updated[h]=inp.value;
-  });
-  // optimistic local update
-  Object.assign(row,updated);
-  editingRowNum=null;applyFilters();
-  toast('💾 Saving…','wrn');
-  apiPost({action:'update',row:rn,data:updated})
-    .then(()=>toast('✓ Row updated!','ok'))
-    .catch(e=>{toast('❌ Update failed: '+e.message,'err');loadData();});
+  headers.forEach(h=>{const inp=document.getElementById('ei_'+rn+'_'+h);if(inp)updated[h]=inp.value;});
+  Object.assign(row,updated);editingRowNum=null;applyFilters();
+  toast('Saving...','wrn');
+  apiCall({action:'update',row:rn,data:updated})
+    .then(()=>toast('Row updated!','ok'))
+    .catch(e=>{toast('Update failed: '+e.message,'err');loadData();});
 }
 
-// ═══════════════════════════════════════
-// SUMMARY
-// ═══════════════════════════════════════
+// ── SUMMARY ──
 function renderSummary(){
   const rk=colKey('resort','customer','client','entity');
   const ak=colKey('amount');
@@ -579,31 +480,26 @@ function renderSummary(){
   const list=Object.values(map).sort((a,b)=>b.amount-a.amount);
   const mx=list[0]?.amount||1;
   document.getElementById('summaryGrid').innerHTML=list.map(r=>{
-    const c=rc(r.resort);
-    const pct=Math.min(100,(r.amount/mx)*100);
-    return `<div class="ccard" onclick="drillResort('${esc(r.resort)}')"
+    const c=rc(r.resort);const pct=Math.min(100,(r.amount/mx)*100);
+    return`<div class="ccard" onclick="drillResort('${esc(r.resort)}')"
       onmouseenter="this.style.borderColor='${c}'"
       onmouseleave="this.style.borderColor='transparent'">
-      <div class="ch"><div class="cdot" style="background:${c}"></div>
-        <div class="cn">${esc(r.resort)}</div></div>
+      <div class="ch"><div class="cdot" style="background:${c}"></div><div class="cn">${esc(r.resort)}</div></div>
       <div class="cstats">
         <div class="cst"><div class="sl">Items</div><div class="sv">${r.items}</div></div>
         <div class="cst"><div class="sl">Orders</div><div class="sv">${r.invs.size}</div></div>
-        <div class="camt"><div class="sl">Total</div>
-          <div class="sv">LKR ${(r.amount/1000).toFixed(0)}K</div></div>
+        <div class="camt"><div class="sl">Total</div><div class="sv">LKR ${(r.amount/1000).toFixed(0)}K</div></div>
       </div>
       <div class="cbar"><div class="cbarfill" style="width:${pct}%;background:${c}"></div></div>
     </div>`;
   }).join('');
 }
+
 function drillResort(resort){
   document.getElementById('resortFilter').value=resort;
   switchView('table');applyFilters();
 }
 
-// ═══════════════════════════════════════
-// VIEW SWITCH
-// ═══════════════════════════════════════
 function switchView(v){
   currentView=v;
   document.getElementById('viewTable').style.display=v==='table'?'block':'none';
@@ -613,89 +509,63 @@ function switchView(v){
   if(v==='summary')renderSummary();else renderTable();
 }
 
-// ═══════════════════════════════════════
-// ADD MODAL
-// ═══════════════════════════════════════
+// ── ADD MODAL ──
 function openAddModal(){
   document.getElementById('formTitle').textContent='+ Add New Item';
   document.getElementById('formSubmitBtn').textContent='Add Item';
-  // Build form fields from actual headers
   document.getElementById('formFields').innerHTML=headers.map(h=>`
-    <div class="frow">
-      <label>${esc(h)}</label>
-      <input id="ff_${esc(h)}" placeholder="${esc(h)}"/>
-    </div>`).join('');
+    <div class="frow"><label>${esc(h)}</label><input id="ff_${esc(h)}" placeholder="${esc(h)}"/></div>`).join('');
   document.getElementById('formOverlay').classList.add('open');
 }
-function closeFormModal(){document.getElementById('formOverlay').classList.remove('open')}
+function closeFormModal(){document.getElementById('formOverlay').classList.remove('open');}
 function submitForm(){
   const data={};let hasVal=false;
-  headers.forEach(h=>{
-    const v=document.getElementById('ff_'+h)?.value||'';
-    data[h]=v;if(v)hasVal=true;
-  });
+  headers.forEach(h=>{const v=document.getElementById('ff_'+h)?.value||'';data[h]=v;if(v)hasVal=true;});
   if(!hasVal){toast('Please fill in at least one field','wrn');return;}
   const btn=document.getElementById('formSubmitBtn');
-  btn.disabled=true;btn.textContent='Adding…';
-  apiPost({action:'add',data})
-    .then(()=>{closeFormModal();toast('✓ Item added to Google Sheets!','ok');loadData();})
-    .catch(e=>toast('❌ '+e.message,'err'))
+  btn.disabled=true;btn.textContent='Adding...';
+  apiCall({action:'add',data})
+    .then(()=>{closeFormModal();toast('Item added!','ok');loadData();})
+    .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Add Item';});
 }
 
-// ═══════════════════════════════════════
-// DELETE
-// ═══════════════════════════════════════
+// ── DELETE ──
 function openDel(rn,desc){
   pendingDeleteRow=rn;
-  document.getElementById('delDesc').textContent=`"${desc}" — Row ${rn} will be permanently removed from Google Sheets.`;
+  document.getElementById('delDesc').textContent='"'+desc+'" will be permanently removed.';
   document.getElementById('delOverlay').classList.add('open');
 }
 function closeDelModal(){document.getElementById('delOverlay').classList.remove('open');pendingDeleteRow=null;}
 function confirmDelete(){
   if(!pendingDeleteRow)return;
   const btn=document.getElementById('delConfirmBtn');
-  btn.disabled=true;btn.textContent='Deleting…';
-  apiPost({action:'delete',row:pendingDeleteRow})
-    .then(()=>{closeDelModal();toast('🗑️ Row deleted!','ok');loadData();})
-    .catch(e=>toast('❌ '+e.message,'err'))
+  btn.disabled=true;btn.textContent='Deleting...';
+  apiCall({action:'delete',row:pendingDeleteRow})
+    .then(()=>{closeDelModal();toast('Row deleted!','ok');loadData();})
+    .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Yes, Delete';});
 }
 
-// ═══════════════════════════════════════
-// API via JSONP — works on ALL devices
-// no CORS / GitHub Pages blocking
-// ═══════════════════════════════════════
-function apiPost(payload){
-  return new Promise(function(resolve,reject){
-    var cbName="__gsw_"+Date.now()+"_"+Math.floor(Math.random()*9999);
-    var script=document.createElement("script");
-    var params="?action="+encodeURIComponent(payload.action)+"&callback="+cbName;
-    if(payload.row!=null) params+="&row="+encodeURIComponent(payload.row);
-    if(payload.data)      params+="&data="+encodeURIComponent(JSON.stringify(payload.data));
-    script.src=API+params;
-    script.async=true;
-    var timeout=setTimeout(function(){cleanup();reject(new Error("Request timed out"));},15000);
-    window[cbName]=function(data){
-      clearTimeout(timeout);cleanup();
-      if(data&&data.error)reject(new Error(data.error));
-      else resolve(data);
-    };
-    script.onerror=function(){clearTimeout(timeout);cleanup();reject(new Error("Script load failed"));}
-    function cleanup(){try{document.body.removeChild(script);}catch(e){}try{delete window[cbName];}catch(e){}}
-    document.body.appendChild(script);
-  });
+// ── API CALL via fetch GET (works everywhere, follows redirects) ──
+function apiCall(payload){
+  let url=API+'?action='+encodeURIComponent(payload.action);
+  if(payload.row!=null) url+='&row='+encodeURIComponent(payload.row);
+  if(payload.data)      url+='&data='+encodeURIComponent(JSON.stringify(payload.data));
+  return fetch(url,{method:'GET',redirect:'follow'})
+    .then(r=>r.text())
+    .then(txt=>{
+      const m=txt.match(/^[^(]+\(([\s\S]*)\)\s*;?\s*$/);
+      const data=JSON.parse(m?m[1]:txt);
+      if(data.error)throw new Error(data.error);
+      return data;
+    });
 }
 
-
-// ═══════════════════════════════════════
-// KEYBOARD + CLICK OUTSIDE
-// ═══════════════════════════════════════
-document.getElementById('formOverlay').addEventListener('click',function(e){if(e.target===this)closeFormModal()});
-document.getElementById('delOverlay').addEventListener('click',function(e){if(e.target===this)closeDelModal()});
+// ── EVENTS ──
+document.getElementById('formOverlay').addEventListener('click',function(e){if(e.target===this)closeFormModal();});
+document.getElementById('delOverlay').addEventListener('click',function(e){if(e.target===this)closeDelModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFormModal();closeDelModal();}});
-
-// AUTO LOAD
 window.addEventListener('load',loadData);
 </script>
 </body>
