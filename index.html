@@ -103,6 +103,10 @@ td{padding:8px 11px;vertical-align:middle}
 tfoot tr{background:var(--green-lt);border-top:2px solid #86efac}
 tfoot td{padding:8px 11px;font-weight:700;color:var(--green)}
 
+/* sheet badge in table */
+.sbadge{background:#f0f4ff;color:#4f46e5;padding:2px 7px;border-radius:5px;
+  font-size:10px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap}
+
 /* ACTION BUTTONS */
 .acts{display:flex;gap:4px;align-items:center;white-space:nowrap}
 .be{padding:4px 9px;border-radius:6px;border:1px solid #bfdbfe;background:var(--blue-lt);
@@ -173,6 +177,13 @@ tfoot td{padding:8px 11px;font-weight:700;color:var(--green)}
   font-weight:600;cursor:pointer;font-family:inherit}
 .inv-add:hover{background:#bbf7d0}
 
+/* NEW INVOICE BANNER */
+.new-inv-banner{background:linear-gradient(135deg,#ecfdf5,#d1fae5);
+  border:1.5px solid #6ee7b7;border-radius:8px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;font-size:13px;color:#065f46;
+  margin-bottom:10px}
+.new-inv-banner strong{font-weight:700}
+
 /* SUMMARY */
 .cgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
 .ccard{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);
@@ -218,6 +229,12 @@ tfoot td{padding:8px 11px;font-weight:700;color:var(--green)}
 .frow input.auto-calc{background:#f0fdf4;color:var(--green);font-weight:700;border-color:#86efac}
 .frow input.auto-calc:focus{border-color:var(--green)}
 .fhint{font-size:11px;color:#94a3b8;margin-top:2px}
+
+/* New invoice indicator in form */
+.new-tab-indicator{display:none;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:7px;
+  padding:8px 12px;font-size:12px;color:#065f46;margin-top:6px;align-items:center;gap:6px}
+.new-tab-indicator.show{display:flex}
+
 .mact{display:flex;gap:8px;margin-top:18px}
 .btn-sub{flex:1;padding:11px;background:var(--blue);color:#fff;border:none;
   border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
@@ -352,15 +369,16 @@ tfoot td{padding:8px 11px;font-weight:700;color:var(--green)}
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbzzeOelQ4n5nLBKGzOkXtAUD_O5jJVSI7xXi9z73MXdMfWP7ZRu4GPxCGpKyvNqNxPaDQ/exec';
+const API = 'https://script.google.com/macros/s/AKfycbx17Es2Ed5qf_C7qg7-MIiQDc53H7-kjQ0WpeA7t8xoUJR-RiKQW5kY-AbhCuIl95zHAw/exec';
 
 let allData=[], headers=[], filtered=[];
 let currentPage=1, currentView='table';
 let sortField='', sortDir='asc';
-let editingRowNum=null, pendingDeleteRow=null;
+let editingRowNum=null, pendingDeleteRow=null, pendingDeleteSheet=null;
 let expandedInvoices=new Set();
-let CK={};   // column keys (set after load)
+let CK={};
 let formMode='add', editRowData=null;
+let knownSheets=new Set(); // all tab names currently in the spreadsheet
 
 const PAGE_SIZE=40;
 const PAL=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899',
@@ -387,7 +405,6 @@ function toast(msg,type='ok'){
   clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',3200);
 }
 
-// Exact match first, then fuzzy
 function colExact(name){
   return headers.find(h=>h.toLowerCase()===name.toLowerCase())||'';
 }
@@ -401,10 +418,9 @@ function colKey(...candidates){
 }
 
 function initKeys(){
-  // Use exact matches for known sheet columns, fallback to fuzzy
   CK={
     no:       colExact('No')           || colKey('no'),
-    bo:       colExact('BO No')        || colKey('bono','invoice'),
+    bo:       colExact('D.Note No.')   || colExact('BO No') || colKey('bono','dnote','invoice'),
     resort:   colExact('Resort')       || colKey('resort','customer','client'),
     itemCode: colExact('Item Code')    || colKey('itemcode','code'),
     item:     colExact('Item')         || colKey('item','description','name','product'),
@@ -420,6 +436,17 @@ function loadData(){
   document.getElementById('syncBtn').textContent='Syncing…';
   document.getElementById('syncBtn').disabled=true;
 
+  // First load all sheet names so we know which invoices already exist
+  fetch(API+'?action=getAllSheets&_t='+Date.now(),{method:'GET',redirect:'follow'})
+    .then(r=>r.text())
+    .then(txt=>{
+      try{
+        const m=txt.match(/^[^(]+\(([\s\S]*)\)\s*;?\s*$/);
+        const d=JSON.parse(m?m[1]:txt);
+        if(d.sheets) knownSheets=new Set(d.sheets);
+      }catch(e){}
+    }).catch(()=>{});
+
   fetch(API+'?action=getAll&_t='+Date.now(),{method:'GET',redirect:'follow'})
     .then(r=>r.text())
     .then(txt=>{
@@ -431,7 +458,11 @@ function loadData(){
       headers=data.headers||[];
       allData=data.rows||[];
       initKeys();
-      allData.forEach(r=>{const v=r[CK.resort];if(v)rc(String(v).trim());});
+      // Build knownSheets from _sheet property on rows too
+      allData.forEach(r=>{
+        if(r._sheet) knownSheets.add(String(r._sheet));
+        const v=r[CK.resort];if(v)rc(String(v).trim());
+      });
       buildFilters();
       applyFilters();
       document.getElementById('syncStatus').textContent=
@@ -554,18 +585,21 @@ function renderTable(){
   }
 
   const arrow=f=>sortField===f?(sortDir==='asc'?' ▲':' ▼'):'';
+  // Add a "Sheet" column header to show which invoice tab each row belongs to
   const thead='<thead><tr>'+
     headers.map(h=>`<th onclick="sortBy('${esc(h)}')">${esc(h)}${arrow(h)}</th>`).join('')+
+    '<th>Sheet Tab</th>'+
     '<th>Actions</th></tr></thead>';
 
   const totalAmt=filtered.reduce((s,r)=>s+pAmt(r[CK.amount]),0);
   const tfoot=CK.amount
-    ?`<tfoot><tr><td colspan="${headers.length}" style="text-align:right">
+    ?`<tfoot><tr><td colspan="${headers.length+1}" style="text-align:right">
         Total (${filtered.length} items):</td>
        <td class="ar">${fAmt(totalAmt)}</td><td></td></tr></tfoot>`:'';
 
   const tbody='<tbody>'+page.map(r=>{
     const rn=r._row;
+    const rowSheet=r._sheet||'';
     const isEdit=editingRowNum===rn;
     const cells=headers.map(h=>{
       const v=r[h];
@@ -589,18 +623,23 @@ function renderTable(){
       return`<td>${esc(v??'')}</td>`;
     }).join('');
 
+    // Sheet tab badge column
+    const sheetCell=rowSheet
+      ?`<td><span class="sbadge" title="Saved in tab: ${esc(rowSheet)}">${esc(rowSheet)}</span></td>`
+      :`<td><span class="cnone">—</span></td>`;
+
     const desc=String(r[CK.item]||r[headers[0]]||'').trim();
     const acts=isEdit
       ?`<td><div class="acts">
-          <button class="bs" onclick="saveEdit(${rn})">✓ Save</button>
+          <button class="bs" onclick="saveEdit(${rn},'${esc(rowSheet)}')">✓ Save</button>
           <button class="bc" onclick="cancelEdit()">Cancel</button>
         </div></td>`
       :`<td><div class="acts">
           <button class="be" onclick="startEdit(${rn})">Edit</button>
-          <button class="bd" onclick="openDel(${rn},'${esc(desc)}')">Del</button>
+          <button class="bd" onclick="openDel(${rn},'${esc(desc)}','${esc(rowSheet)}')">Del</button>
         </div></td>`;
 
-    return`<tr class="${isEdit?'erow':''}">${cells}${acts}</tr>`;
+    return`<tr class="${isEdit?'erow':''}">${cells}${sheetCell}${acts}</tr>`;
   }).join('')+'</tbody>';
 
   document.getElementById('tableArea').innerHTML=
@@ -634,7 +673,7 @@ function renderInvoiceView(){
   const grouped={};
   filtered.forEach(r=>{
     const bo=String(r[CK.bo]||'(No Invoice)').trim();
-    if(!grouped[bo])grouped[bo]={rows:[],amount:0,resorts:new Set()};
+    if(!grouped[bo])grouped[bo]={rows:[],amount:0,resorts:new Set(),sheet:r._sheet||''};
     grouped[bo].rows.push(r);
     grouped[bo].amount+=pAmt(r[CK.amount]);
     const res=String(r[CK.resort]||'').trim();
@@ -664,6 +703,7 @@ function renderInvoiceView(){
 
     const rowsHtml=g.rows.map(r=>{
       const rn=r._row;
+      const rowSheet=r._sheet||'';
       const ic=String(r[CK.itemCode]||'').trim();
       const hasCode=ic&&ic.toUpperCase()!=='NO CODE';
       return`<tr>
@@ -678,10 +718,15 @@ function renderInvoiceView(){
         <td class="ar">${fAmt(r[CK.amount])}</td>
         <td><div class="acts">
           <button class="be" onclick="startEdit(${rn});switchView('table')">Edit</button>
-          <button class="bd" onclick="openDel(${rn},'${esc(String(r[CK.item]||''))}')">Del</button>
+          <button class="bd" onclick="openDel(${rn},'${esc(String(r[CK.item]||''))}','${esc(rowSheet)}')">Del</button>
         </div></td>
       </tr>`;
     }).join('');
+
+    // Show which sheet tab this invoice is saved in
+    const sheetLabel=g.sheet
+      ?`<span style="font-size:11px;color:#6366f1;font-family:'DM Mono',monospace;background:#f0f4ff;padding:2px 7px;border-radius:5px;font-weight:700">Tab: ${esc(g.sheet)}</span>`
+      :'';
 
     return`<div class="inv-card${isOpen?' expanded':''}" id="invc_${esc(bo)}">
       <div class="inv-hdr" onclick="toggleInvoice('${esc(bo)}')">
@@ -689,6 +734,7 @@ function renderInvoiceView(){
         <span class="inv-no">${esc(bo)}</span>
         <span class="inv-resorts">${resortDots}</span>
         <div class="inv-meta">
+          ${sheetLabel}
           <div class="inv-m"><div class="ml">Items</div><div class="mv">${g.rows.length}</div></div>
           <div class="inv-m"><div class="ml">Resorts</div><div class="mv">${g.resorts.size}</div></div>
           <div class="inv-amt">${fAmt(g.amount)}</div>
@@ -787,7 +833,7 @@ function switchView(v){
   else renderSummary();
 }
 
-// ─── ADD MODAL (structured, smart) ───────────────────────────────────────────
+// ─── ADD MODAL ───────────────────────────────────────────────────────────────
 function openAddModal(prefillBo=''){
   formMode='add';editRowData=null;
   document.getElementById('formTitle').textContent='＋ Add New Item';
@@ -801,11 +847,16 @@ function openAddModal(prefillBo=''){
     <div class="msec">📋 Invoice</div>
     <div class="fgrid fc1">
       <div class="frow">
-        <label>BO No — Invoice Number *</label>
-        <input id="ff_bo" list="dl_bo" placeholder="e.g. BO 24-A-0023 (type or pick existing)"
-          autocomplete="off" value="${esc(prefillBo)}" style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600"/>
+        <label>Invoice Number (D.Note No.) *</label>
+        <input id="ff_bo" list="dl_bo" placeholder="e.g. 1300 — type existing or NEW number"
+          autocomplete="off" value="${esc(prefillBo)}"
+          style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600"
+          oninput="checkInvoiceTab(this.value)"/>
         <datalist id="dl_bo">${bos.map(v=>`<option value="${esc(v)}">`).join('')}</datalist>
-        <div class="fhint">Pick an existing invoice from the list, or type a new number to create a new invoice</div>
+        <div class="fhint">Pick an existing invoice or type a NEW number — a new sheet tab will be created automatically</div>
+        <div class="new-tab-indicator" id="newTabIndicator">
+          ✨ <strong id="newTabName"></strong> — a new Google Sheets tab will be created automatically when you save
+        </div>
       </div>
     </div>
 
@@ -843,8 +894,25 @@ function openAddModal(prefillBo=''){
       </div>
     </div>`;
 
+  // Pre-check if the prefilled BO is new
+  if(prefillBo) checkInvoiceTab(prefillBo);
+
   document.getElementById('formOverlay').classList.add('open');
   setTimeout(()=>document.getElementById('ff_bo').focus(),80);
+}
+
+// Shows/hides the "new tab will be created" indicator
+function checkInvoiceTab(val){
+  val=(val||'').trim();
+  const indicator=document.getElementById('newTabIndicator');
+  const nameEl=document.getElementById('newTabName');
+  if(!indicator||!nameEl)return;
+  if(val && !knownSheets.has(val)){
+    nameEl.textContent='New tab "'+val+'" will be created';
+    indicator.classList.add('show');
+  } else {
+    indicator.classList.remove('show');
+  }
 }
 
 function autoCalcAmount(){
@@ -870,15 +938,14 @@ function submitForm(){
   const rate    =v('ff_rate');
   let   amount  =v('ff_amount');
 
-  if(!bo){toast('BO No (Invoice Number) is required','wrn');document.getElementById('ff_bo').focus();return;}
+  if(!bo){toast('Invoice Number is required','wrn');document.getElementById('ff_bo').focus();return;}
   if(!resort){toast('Resort is required','wrn');document.getElementById('ff_resort').focus();return;}
   if(!item){toast('Item Name is required','wrn');document.getElementById('ff_item').focus();return;}
 
-  // Auto-compute amount if blank
   if(!amount&&qty&&rate) amount=(parseFloat(qty)*parseFloat(rate)).toFixed(2);
 
-  // Auto-assign No
   const maxNo=allData.reduce((m,r)=>Math.max(m,parseInt(r[CK.no])||0),0);
+  const isNewSheet=!knownSheets.has(bo);
 
   const data={};
   if(CK.no)       data[CK.no]       = maxNo+1;
@@ -890,22 +957,34 @@ function submitForm(){
   if(CK.rate)     data[CK.rate]     = rate;
   if(CK.amount)   data[CK.amount]   = amount;
 
-  btn.disabled=true;btn.textContent='Adding…';
-  apiCall({action:'add',data})
+  btn.disabled=true;
+  btn.textContent=isNewSheet?'Creating tab & saving…':'Adding…';
+
+  // ★ KEY CHANGE: pass bo as the sheet name so Apps Script saves to the right tab
+  apiCall({action:'add', data, sheet: bo})
     .then(()=>{
       closeFormModal();
-      toast('Item added! Refreshing…','ok');
+      // Add to knownSheets immediately so future checks work in this session
+      knownSheets.add(bo);
+      if(isNewSheet){
+        toast('✨ New tab "'+bo+'" created & item saved!','ok');
+      } else {
+        toast('Item added to invoice '+bo+' ✓','ok');
+      }
       setTimeout(loadData,1200);
     })
     .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Add Item';});
 }
 
-// ─── INLINE EDIT (table) ─────────────────────────────────────────────────────
+// ─── INLINE EDIT ─────────────────────────────────────────────────────────────
 function startEdit(rn){editingRowNum=rn;if(currentView!=='table')switchView('table');else renderTable();}
 function cancelEdit(){editingRowNum=null;renderTable();}
-function saveEdit(rn){
+
+function saveEdit(rn, rowSheet){
   const row=allData.find(r=>r._row===rn);if(!row)return;
+  // Use the passed rowSheet, fall back to _sheet on the row object
+  const targetSheet=rowSheet||row._sheet||'';
   const updated={};
   headers.forEach(h=>{
     const inp=document.getElementById('ei_'+rn+'_'+h);
@@ -913,33 +992,43 @@ function saveEdit(rn){
   });
   Object.assign(row,updated);editingRowNum=null;applyFilters();
   toast('Saving…','wrn');
-  apiCall({action:'update',row:rn,data:updated})
+  // ★ KEY CHANGE: include sheet so update goes to the correct tab
+  apiCall({action:'update', row:rn, data:updated, sheet:targetSheet})
     .then(()=>toast('Row updated ✓','ok'))
     .catch(e=>{toast('Update failed: '+e.message,'err');loadData();});
 }
 
 // ─── DELETE ──────────────────────────────────────────────────────────────────
-function openDel(rn,desc){
+function openDel(rn, desc, rowSheet){
   pendingDeleteRow=rn;
-  document.getElementById('delDesc').textContent='"'+desc+'" will be permanently removed from the sheet.';
+  pendingDeleteSheet=rowSheet||'';   // ★ KEY CHANGE: store the sheet
+  document.getElementById('delDesc').textContent=
+    '"'+desc+'" will be permanently removed from sheet tab "'+
+    (rowSheet||'(unknown)')+'".\nThis cannot be undone.';
   document.getElementById('delOverlay').classList.add('open');
 }
-function closeDelModal(){document.getElementById('delOverlay').classList.remove('open');pendingDeleteRow=null;}
+function closeDelModal(){
+  document.getElementById('delOverlay').classList.remove('open');
+  pendingDeleteRow=null;
+  pendingDeleteSheet=null;
+}
 function confirmDelete(){
   if(!pendingDeleteRow)return;
   const btn=document.getElementById('delConfirmBtn');
   btn.disabled=true;btn.textContent='Deleting…';
-  apiCall({action:'delete',row:pendingDeleteRow})
+  // ★ KEY CHANGE: pass sheet so deletion happens in the right tab
+  apiCall({action:'delete', row:pendingDeleteRow, sheet:pendingDeleteSheet})
     .then(()=>{closeDelModal();toast('Row deleted','ok');loadData();})
     .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Yes, Delete';});
 }
 
-// ─── API CALL (GET, follows redirects) ───────────────────────────────────────
+// ─── API CALL ─────────────────────────────────────────────────────────────────
 function apiCall(payload){
   let url=API+'?action='+encodeURIComponent(payload.action);
-  if(payload.row!=null) url+='&row='+encodeURIComponent(payload.row);
-  if(payload.data)      url+='&data='+encodeURIComponent(JSON.stringify(payload.data));
+  if(payload.row!=null)   url+='&row='+encodeURIComponent(payload.row);
+  if(payload.sheet)       url+='&sheet='+encodeURIComponent(payload.sheet); // ★ sheet param
+  if(payload.data)        url+='&data='+encodeURIComponent(JSON.stringify(payload.data));
   return fetch(url,{method:'GET',redirect:'follow'})
     .then(r=>r.text())
     .then(txt=>{
