@@ -495,7 +495,9 @@ function showConnError(msg){
 // ─── FILTERS ─────────────────────────────────────────────────────────────────
 function buildFilters(){
   const resorts =[...new Set(allData.map(r=>String(r[CK.resort]  ||'').trim()))].filter(Boolean).sort();
-  const invoices=[...new Set(allData.map(r=>String(r[CK.bo]      ||'').trim()))].filter(Boolean).sort();
+  // ★ Invoice filter now uses sheet tab names (1285, 1286…) not D.Note values
+  const invoices=[...new Set(allData.map(r=>String(r._sheet||'').trim()))].filter(Boolean)
+    .sort((a,b)=>{const na=parseInt(a),nb=parseInt(b);return(!isNaN(na)&&!isNaN(nb))?na-nb:a.localeCompare(b);});
   const codes   =[...new Set(allData.map(r=>String(r[CK.itemCode]||'').trim()))].filter(Boolean).sort();
 
   const rebuild=(id,label,vals)=>{
@@ -518,7 +520,8 @@ function applyFilters(){
 
   filtered=allData.filter(r=>{
     if(rf  && String(r[CK.resort]  ||'').trim()!==rf )return false;
-    if(ivf && String(r[CK.bo]      ||'').trim()!==ivf)return false;
+    // ★ Filter by _sheet tab name, not D.Note value
+    if(ivf && String(r._sheet||'').trim()!==ivf)return false;
     if(icf && String(r[CK.itemCode]||'').trim()!==icf)return false;
     if(q){const row=Object.values(r).join(' ').toLowerCase();if(!row.includes(q))return false;}
     return true;
@@ -557,7 +560,7 @@ function clearFilters(){
 function updateStats(){
   const total   =filtered.reduce((s,r)=>s+pAmt(r[CK.amount]),0);
   const resorts =new Set(filtered.map(r=>String(r[CK.resort]||'').trim()).filter(Boolean));
-  const invs    =new Set(filtered.map(r=>String(r[CK.bo]||'').trim()).filter(Boolean));
+  const invs    =new Set(filtered.map(r=>String(r._sheet||'').trim()).filter(Boolean));
   document.getElementById('sItems').textContent=filtered.length.toLocaleString();
   document.getElementById('sAmt').textContent  =total?'LKR '+Math.round(total/1000)+'K':'—';
   document.getElementById('sResorts').textContent=resorts.size;
@@ -662,8 +665,8 @@ function renderTable(){
 
 function goPage(p){currentPage=p;renderTable();}
 
-function filterByInvoice(boNo){
-  document.getElementById('invoiceFilter').value=boNo;
+function filterByInvoice(sheetTab){
+  document.getElementById('invoiceFilter').value=sheetTab;
   switchView('invoice');
   applyFilters();
 }
@@ -672,15 +675,25 @@ function filterByInvoice(boNo){
 function renderInvoiceView(){
   const grouped={};
   filtered.forEach(r=>{
-    const bo=String(r[CK.bo]||'(No Invoice)').trim();
-    if(!grouped[bo])grouped[bo]={rows:[],amount:0,resorts:new Set(),sheet:r._sheet||''};
-    grouped[bo].rows.push(r);
-    grouped[bo].amount+=pAmt(r[CK.amount]);
+    // ★ Group by SHEET TAB NAME (1285, 1286…) — the real invoice tab number
+    const tabKey=String(r._sheet||'(No Tab)').trim();
+    if(!grouped[tabKey])grouped[tabKey]={rows:[],amount:0,resorts:new Set(),dnotes:new Set()};
+    grouped[tabKey].rows.push(r);
+    grouped[tabKey].amount+=pAmt(r[CK.amount]);
     const res=String(r[CK.resort]||'').trim();
-    if(res)grouped[bo].resorts.add(res);
+    if(res)grouped[tabKey].resorts.add(res);
+    // Collect D.Note No. values inside this tab (e.g. BO 24-A-0023)
+    const dn=String(r[CK.bo]||'').trim();
+    if(dn)grouped[tabKey].dnotes.add(dn);
   });
 
-  const invoices=Object.keys(grouped).sort();
+  // Sort numerically (1285 < 1286 < 1287…)
+  const invoices=Object.keys(grouped).sort((a,b)=>{
+    const na=parseInt(a), nb=parseInt(b);
+    if(!isNaN(na)&&!isNaN(nb)) return na-nb;
+    return a.localeCompare(b);
+  });
+
   if(!invoices.length){
     document.getElementById('invoiceList').innerHTML=
       '<div class="empty"><div class="ei">🔍</div><p>No invoices match your filters.</p></div>';
@@ -692,23 +705,32 @@ function renderInvoiceView(){
   document.getElementById('invToolbarInfo').textContent=
     invoices.length+' invoice'+(invoices.length!==1?'s':'')+' · '+filtered.length+' items · '+fAmt(totalAmt);
 
-  document.getElementById('invoiceList').innerHTML=invoices.map(bo=>{
-    const g=grouped[bo];
-    const isOpen=expandedInvoices.has(bo);
+  document.getElementById('invoiceList').innerHTML=invoices.map(tabKey=>{
+    const g=grouped[tabKey];
+    const isOpen=expandedInvoices.has(tabKey);
+
     const resortDots=[...g.resorts].map(res=>
       `<span style="display:inline-flex;align-items:center;gap:3px;margin-right:5px">
         <span style="width:7px;height:7px;border-radius:50%;background:${rc(res)};display:inline-block"></span>
         <span style="font-size:11px;color:#475569">${esc(res)}</span>
       </span>`).join('');
 
+    // Show D.Note numbers inside the tab as a subtitle
+    const dnoteList=[...g.dnotes].join(', ');
+    const dnoteSubtitle=dnoteList
+      ?`<span style="font-size:11px;color:#94a3b8;margin-left:8px;font-family:'DM Mono',monospace">${esc(dnoteList)}</span>`
+      :'';
+
     const rowsHtml=g.rows.map(r=>{
       const rn=r._row;
       const rowSheet=r._sheet||'';
       const ic=String(r[CK.itemCode]||'').trim();
       const hasCode=ic&&ic.toUpperCase()!=='NO CODE';
+      const dnote=String(r[CK.bo]||'').trim();
       return`<tr>
         <td>${hasCode?`<span class="ibadge">${esc(ic)}</span>`:`<span class="cnone">—</span>`}</td>
-        <td><div class="idesc" style="max-width:260px" title="${esc(r[CK.item])}">${esc(r[CK.item]||'')}</div></td>
+        <td><div class="idesc" style="max-width:220px" title="${esc(r[CK.item])}">${esc(r[CK.item]||'')}</div></td>
+        <td>${dnote?`<span class="cbadge" style="cursor:default">${esc(dnote)}</span>`:`<span class="cnone">—</span>`}</td>
         <td><div class="rcell">
           <div class="rdot" style="background:${rc(String(r[CK.resort]||'').trim())}"></div>
           <span>${esc(r[CK.resort]||'')}</span>
@@ -723,18 +745,13 @@ function renderInvoiceView(){
       </tr>`;
     }).join('');
 
-    // Show which sheet tab this invoice is saved in
-    const sheetLabel=g.sheet
-      ?`<span style="font-size:11px;color:#6366f1;font-family:'DM Mono',monospace;background:#f0f4ff;padding:2px 7px;border-radius:5px;font-weight:700">Tab: ${esc(g.sheet)}</span>`
-      :'';
-
-    return`<div class="inv-card${isOpen?' expanded':''}" id="invc_${esc(bo)}">
-      <div class="inv-hdr" onclick="toggleInvoice('${esc(bo)}')">
+    return`<div class="inv-card${isOpen?' expanded':''}" id="invc_${esc(tabKey)}">
+      <div class="inv-hdr" onclick="toggleInvoice('${esc(tabKey)}')">
         <span class="inv-arrow${isOpen?' open':''}">▼</span>
-        <span class="inv-no">${esc(bo)}</span>
-        <span class="inv-resorts">${resortDots}</span>
+        <span class="inv-no">Invoice ${esc(tabKey)}</span>
+        ${dnoteSubtitle}
+        <span class="inv-resorts" style="margin-left:10px">${resortDots}</span>
         <div class="inv-meta">
-          ${sheetLabel}
           <div class="inv-m"><div class="ml">Items</div><div class="mv">${g.rows.length}</div></div>
           <div class="inv-m"><div class="ml">Resorts</div><div class="mv">${g.resorts.size}</div></div>
           <div class="inv-amt">${fAmt(g.amount)}</div>
@@ -743,7 +760,7 @@ function renderInvoiceView(){
       <div class="inv-body${isOpen?' open':''}">
         <table>
           <thead><tr>
-            <th>Item Code</th><th>Item</th><th>Resort</th>
+            <th>Item Code</th><th>Item</th><th>D.Note No.</th><th>Resort</th>
             <th style="text-align:right">Qty</th>
             <th style="text-align:right">Rate (LKR)</th>
             <th style="text-align:right">Amount (LKR)</th>
@@ -754,7 +771,7 @@ function renderInvoiceView(){
         <div class="inv-subtotal">
           <span class="ist">${g.rows.length} items · ${g.resorts.size} resort${g.resorts.size!==1?'s':''}</span>
           <div style="display:flex;align-items:center;gap:10px">
-            <button class="inv-add" onclick="openAddModal('${esc(bo)}')">＋ Add Item to this Invoice</button>
+            <button class="inv-add" onclick="openAddModal('${esc(tabKey)}')">＋ Add Item to Invoice ${esc(tabKey)}</button>
             <span class="isa">Subtotal: ${fAmt(g.amount)}</span>
           </div>
         </div>
@@ -763,20 +780,21 @@ function renderInvoiceView(){
   }).join('');
 }
 
-function toggleInvoice(bo){
-  if(expandedInvoices.has(bo))expandedInvoices.delete(bo);
-  else expandedInvoices.add(bo);
-  const card=document.getElementById('invc_'+bo);
+function toggleInvoice(tabKey){
+  if(expandedInvoices.has(tabKey))expandedInvoices.delete(tabKey);
+  else expandedInvoices.add(tabKey);
+  const card=document.getElementById('invc_'+tabKey);
   if(!card)return;
-  card.querySelector('.inv-arrow').classList.toggle('open',expandedInvoices.has(bo));
-  card.querySelector('.inv-body').classList.toggle('open',expandedInvoices.has(bo));
-  card.classList.toggle('expanded',expandedInvoices.has(bo));
+  card.querySelector('.inv-arrow').classList.toggle('open',expandedInvoices.has(tabKey));
+  card.querySelector('.inv-body').classList.toggle('open',expandedInvoices.has(tabKey));
+  card.classList.toggle('expanded',expandedInvoices.has(tabKey));
 }
 
 function expandAll(open){
-  const invoices=filtered.map(r=>String(r[CK.bo]||'').trim()).filter(Boolean);
-  invoices.forEach(bo=>{
-    if(open)expandedInvoices.add(bo);else expandedInvoices.delete(bo);
+  // ★ Use _sheet keys for expand/collapse
+  const tabs=[...new Set(filtered.map(r=>String(r._sheet||'').trim()).filter(Boolean))];
+  tabs.forEach(t=>{
+    if(open)expandedInvoices.add(t);else expandedInvoices.delete(t);
   });
   renderInvoiceView();
 }
