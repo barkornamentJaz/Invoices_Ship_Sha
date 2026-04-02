@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sha &amp; Sha — Invoice Management</title>
+<title>Sha & Sha — Invoice Management</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -16,19 +16,20 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1e293b;min-height:100vh}
+
 /* HEADER */
 .hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 55%,#1e4fd8 100%);
   color:#fff;position:sticky;top:0;z-index:200;box-shadow:0 4px 24px rgba(15,31,61,.45)}
-.hdr-in{max-width:1500px;margin:0 auto;padding:16px 24px}
+.hdr-in{max-width:1500px;margin:0 auto;padding:14px 24px}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-ico{width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;
-  display:flex;align-items:center;justify-content:center;font-size:20px;
+.brand-ico{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:19px;
   border:1px solid rgba(255,255,255,.2)}
-.brand h1{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.brand h1{font-size:18px;font-weight:700;letter-spacing:-.4px}
 .brand p{font-size:11px;opacity:.65;margin-top:1px}
-.hdr-btns{display:flex;gap:7px;flex-wrap:wrap}
-.btn{padding:8px 15px;border-radius:8px;border:none;cursor:pointer;
+.hdr-btns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;
   font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
   transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-tab{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.15)}
@@ -38,127 +39,216 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:#1e293b;min-hei
 .btn-add:hover{background:#0f766e}
 .btn-sync{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)}
 .btn-sync:hover{background:rgba(255,255,255,.22)}
-.stats-bar{display:flex;gap:10px;margin-top:13px;flex-wrap:wrap}
-.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 14px}
+.stats-bar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:5px 14px}
 .stat .sl{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.06em}
 .stat .sv{font-size:18px;font-weight:700;line-height:1.2}
+
 /* LOADER */
 .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;gap:16px;color:var(--slate)}
-.spinner{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* ERROR BOX */
+
+/* ERROR */
 .error-box{background:#fff;border-radius:12px;padding:32px;text-align:center;max-width:560px;margin:40px auto;box-shadow:var(--shadow)}
 .error-box .ei{font-size:36px;margin-bottom:12px}
 .error-box h3{color:var(--red);margin-bottom:8px}
 .error-box p{color:var(--slate);font-size:14px;line-height:1.6}
 .error-box code{background:#f1f5f9;padding:6px 10px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;display:block;margin-top:10px;word-break:break-all;text-align:left}
+
 /* CONTENT */
-.content{max-width:1500px;margin:0 auto;padding:20px 24px}
+.content{max-width:1500px;margin:0 auto;padding:18px 24px}
+
 /* FILTER BAR */
-.fbar{background:#fff;border-radius:12px;padding:13px 17px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.sw{flex:1 1 230px;position:relative}
-.sw input{width:100%;padding:9px 12px 9px 34px;border-radius:8px;border:1.5px solid var(--border);font-size:14px;outline:none;font-family:inherit;transition:border-color .15s}
+.fbar{background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:13px;
+  box-shadow:var(--shadow);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{flex:1 1 200px;position:relative}
+.sw input{width:100%;padding:9px 12px 9px 34px;border-radius:8px;border:1.5px solid var(--border);
+  font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
 .sw input:focus{border-color:var(--blue)}
-.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.38;font-size:15px;pointer-events:none}
-.fsel{padding:9px 11px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-family:inherit;background:#fff;outline:none;cursor:pointer;transition:border-color .15s;color:#374151;min-width:155px}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.38;font-size:14px;pointer-events:none}
+.fsel{padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;
+  font-family:inherit;background:#fff;outline:none;cursor:pointer;
+  transition:border-color .15s;color:#374151;min-width:148px}
 .fsel:focus{border-color:var(--blue)}
-.btn-clr{padding:9px 13px;border-radius:8px;border:1px solid #fca5a5;background:var(--red-lt);color:var(--red);font-size:13px;cursor:pointer;font-weight:500;font-family:inherit;display:none}
+.btn-clr{padding:8px 13px;border-radius:8px;border:1px solid #fca5a5;background:var(--red-lt);
+  color:var(--red);font-size:13px;cursor:pointer;font-weight:600;font-family:inherit;display:none}
 .btn-clr:hover{background:#fecaca}
+.filter-count{font-size:12px;color:var(--slate);white-space:nowrap}
+
 /* TABLE */
 .twrap{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
 .tscroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead tr{background:#f8fafc;border-bottom:2px solid var(--border)}
-th{padding:10px 11px;text-align:left;font-weight:600;font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none;white-space:nowrap}
+th{padding:9px 11px;text-align:left;font-weight:600;font-size:11px;color:var(--slate);
+  text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none;white-space:nowrap}
 th:hover{color:var(--blue)}
 tbody tr{border-bottom:1px solid #f1f5f9;transition:background .1s}
 tbody tr:hover{background:#f8fafc}
 tbody tr.erow{background:#fffbeb!important}
-td{padding:9px 11px;vertical-align:middle}
+td{padding:8px 11px;vertical-align:middle}
 .rdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
 .rcell{display:flex;align-items:center;gap:6px}
 .rname{font-weight:500;color:#1e293b}
-.cbadge{background:var(--green-lt);color:#166534;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace}
+.cbadge{background:var(--blue-lt);color:#1d4ed8;padding:2px 8px;border-radius:5px;
+  font-size:11px;font-weight:700;font-family:'DM Mono',monospace;cursor:pointer}
+.cbadge:hover{background:#bfdbfe}
+.ibadge{background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:5px;
+  font-size:11px;font-weight:500;font-family:'DM Mono',monospace}
 .cnone{color:#cbd5e1;font-size:12px}
-.idesc{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b}
+.idesc{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nr{text-align:right;font-variant-numeric:tabular-nums;color:var(--slate)}
 .ar{text-align:right;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums}
 tfoot tr{background:var(--green-lt);border-top:2px solid #86efac}
-tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
+tfoot td{padding:8px 11px;font-weight:700;color:var(--green)}
+
 /* ACTION BUTTONS */
-.acts{display:flex;gap:5px;align-items:center;white-space:nowrap}
-.be{padding:5px 10px;border-radius:6px;border:1px solid #bfdbfe;background:var(--blue-lt);color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s}
+.acts{display:flex;gap:4px;align-items:center;white-space:nowrap}
+.be{padding:4px 9px;border-radius:6px;border:1px solid #bfdbfe;background:var(--blue-lt);
+  color:var(--blue);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .be:hover{background:#bfdbfe}
-.bd{padding:5px 10px;border-radius:6px;border:1px solid #fecaca;background:var(--red-lt);color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s}
+.bd{padding:4px 9px;border-radius:6px;border:1px solid #fecaca;background:var(--red-lt);
+  color:var(--red);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .bd:hover{background:#fecaca}
-.bs{padding:5px 10px;border-radius:6px;border:1px solid #86efac;background:var(--green-lt);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s}
+.bs{padding:4px 9px;border-radius:6px;border:1px solid #86efac;background:var(--green-lt);
+  color:var(--green);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .bs:hover{background:#bbf7d0}
-.bc{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#f8fafc;color:var(--slate);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.bc{padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:#f8fafc;
+  color:var(--slate);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 .bc:hover{background:#e2e8f0}
+
 /* INLINE EDIT */
-.einp{padding:5px 8px;border-radius:6px;border:1.5px solid var(--blue);font-size:13px;font-family:inherit;outline:none;width:100%;min-width:70px;background:#fffbeb}
+.einp{padding:4px 7px;border-radius:6px;border:1.5px solid var(--blue);font-size:13px;
+  font-family:inherit;outline:none;width:100%;min-width:60px;background:#fffbeb}
+
 /* PAGINATION */
-.pag{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:14px;flex-wrap:wrap}
-.pg{padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-family:inherit;transition:all .12s;color:#374151}
+.pag{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:13px;flex-wrap:wrap}
+.pg{padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:#fff;
+  cursor:pointer;font-size:13px;font-family:inherit;transition:all .12s;color:#374151}
 .pg:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
 .pg:disabled{opacity:.35;cursor:default}
 .pg.act{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
-.pg-info{font-size:13px;color:var(--slate);margin-left:8px}
+.pg-info{font-size:13px;color:var(--slate);margin-left:6px}
+
+/* ── INVOICE VIEW ── */
+.inv-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.inv-toolbar-info{font-size:13px;color:var(--slate);flex:1}
+.btn-expall{padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:#fff;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--slate)}
+.btn-expall:hover{background:#f1f5f9}
+.inv-list{display:flex;flex-direction:column;gap:8px}
+.inv-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);
+  overflow:hidden;border:2px solid transparent;transition:border-color .15s}
+.inv-card.expanded{border-color:var(--blue);box-shadow:var(--shadow-md)}
+.inv-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  cursor:pointer;user-select:none;transition:background .1s}
+.inv-hdr:hover{background:#f8fafc}
+.inv-arrow{font-size:11px;color:var(--slate);transition:transform .2s;
+  flex-shrink:0;width:14px;text-align:center}
+.inv-arrow.open{transform:rotate(180deg)}
+.inv-no{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;
+  color:#1d4ed8;background:var(--blue-lt);padding:4px 10px;border-radius:6px;
+  flex-shrink:0;white-space:nowrap}
+.inv-resorts{font-size:12px;color:var(--slate);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-meta{display:flex;gap:16px;align-items:center;flex-shrink:0}
+.inv-m{text-align:center}
+.inv-m .ml{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.inv-m .mv{font-size:14px;font-weight:700;color:#1e293b;line-height:1.2}
+.inv-amt{font-size:15px;font-weight:800;color:var(--teal);white-space:nowrap}
+.inv-body{border-top:1px solid var(--border);display:none}
+.inv-body.open{display:block}
+.inv-body table{width:100%}
+.inv-body thead tr{background:#f8fafc}
+.inv-body th{font-size:10px}
+.inv-body td{padding:7px 11px}
+.inv-subtotal{background:var(--green-lt);padding:8px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid #86efac;font-size:13px}
+.inv-subtotal .ist{color:var(--slate);font-size:12px}
+.inv-subtotal .isa{font-weight:800;color:var(--green)}
+.inv-add{padding:5px 12px;border-radius:6px;border:1px solid #86efac;
+  background:var(--green-lt);color:var(--green);font-size:12px;
+  font-weight:600;cursor:pointer;font-family:inherit}
+.inv-add:hover{background:#bbf7d0}
+
 /* SUMMARY */
-.cgrid{display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
-.ccard{background:#fff;border-radius:12px;padding:15px;box-shadow:var(--shadow);cursor:pointer;transition:all .15s;border:2px solid transparent}
+.cgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.ccard{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);
+  cursor:pointer;transition:all .15s;border:2px solid transparent}
 .ccard:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.ch{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.ch{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .cn{font-weight:700;color:#1e293b;font-size:14px;line-height:1.3}
-.cstats{display:flex;gap:14px;align-items:flex-end}
+.cstats{display:flex;gap:12px;align-items:flex-end}
 .cst .sl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
-.cst .sv{font-size:20px;font-weight:700;color:#1e293b;line-height:1}
+.cst .sv{font-size:19px;font-weight:700;color:#1e293b;line-height:1}
 .camt{margin-left:auto;text-align:right}
 .camt .sl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
 .camt .sv{font-size:14px;font-weight:700;color:var(--teal)}
-.cbar{margin-top:10px;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden}
+.cbar{margin-top:9px;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden}
 .cbarfill{height:100%;border-radius:2px;transition:width .4s}
+
 /* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;align-items:center;justify-content:center;z-index:300;padding:16px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.52);display:none;
+  align-items:center;justify-content:center;z-index:300;padding:16px}
 .overlay.open{display:flex}
-.modal{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:sup .2s ease}
-@keyframes sup{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal{background:#fff;border-radius:16px;padding:24px;width:100%;
+  max-width:580px;max-height:92vh;overflow-y:auto;animation:sup .2s ease}
+@keyframes sup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .mh h2{font-size:17px;font-weight:700;color:#1e293b}
-.mclose{background:none;border:none;font-size:20px;cursor:pointer;color:var(--slate)}
-.fgrid{display:grid;gap:11px;grid-template-columns:1fr 1fr}
+.mclose{background:none;border:none;font-size:20px;cursor:pointer;color:var(--slate);
+  width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.mclose:hover{background:#f1f5f9}
+.msub{font-size:12px;color:var(--slate);margin-bottom:16px}
+.msec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--blue);margin:16px 0 9px;display:flex;align-items:center;gap:7px}
+.msec::after{content:'';flex:1;height:1px;background:var(--blue-lt)}
+.fgrid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.fgrid.fc1{grid-template-columns:1fr}
+.fgrid.fc3{grid-template-columns:1fr 1fr 1fr}
 .frow{display:flex;flex-direction:column;gap:4px}
-.frow label{font-size:13px;font-weight:600;color:#374151}
-.frow input{padding:9px 11px;border-radius:8px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
-.frow input:focus{border-color:var(--blue)}
-.mact{display:flex;gap:9px;margin-top:18px}
-.btn-sub{flex:1;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.frow.fspan{grid-column:1/-1}
+.frow label{font-size:12px;font-weight:600;color:#374151}
+.frow input,.frow select{padding:9px 11px;border-radius:8px;border:1.5px solid var(--border);
+  font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;background:#fff}
+.frow input:focus,.frow select:focus{border-color:var(--blue)}
+.frow input.auto-calc{background:#f0fdf4;color:var(--green);font-weight:700;border-color:#86efac}
+.frow input.auto-calc:focus{border-color:var(--green)}
+.fhint{font-size:11px;color:#94a3b8;margin-top:2px}
+.mact{display:flex;gap:8px;margin-top:18px}
+.btn-sub{flex:1;padding:11px;background:var(--blue);color:#fff;border:none;
+  border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
 .btn-sub:hover{background:#1d4ed8}
 .btn-sub:disabled{background:#93c5fd;cursor:not-allowed}
-.btn-can{padding:11px 18px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
+.btn-can{padding:11px 18px;background:#f1f5f9;color:#374151;border:none;
+  border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
 .btn-can:hover{background:#e2e8f0}
-/* DELETE CONFIRM */
-.dmodal{background:#fff;border-radius:14px;padding:28px;width:100%;max-width:400px;text-align:center;animation:sup .2s ease}
-.dmodal .di{font-size:42px;margin-bottom:12px}
-.dmodal h3{font-size:17px;font-weight:700;margin-bottom:8px}
-.dmodal p{color:var(--slate);font-size:14px;margin-bottom:20px;line-height:1.5}
-.dact{display:flex;gap:9px;justify-content:center}
-.btn-dodel{padding:10px 22px;background:var(--red);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* DELETE */
+.dmodal{background:#fff;border-radius:14px;padding:26px;width:100%;
+  max-width:380px;text-align:center;animation:sup .2s ease}
+.dmodal .di{font-size:40px;margin-bottom:10px}
+.dmodal h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.dmodal p{color:var(--slate);font-size:14px;margin-bottom:18px;line-height:1.5}
+.dact{display:flex;gap:8px;justify-content:center}
+.btn-dodel{padding:10px 20px;background:var(--red);color:#fff;border:none;
+  border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-dodel:hover{background:#b91c1c}
 .btn-dodel:disabled{background:#fca5a5;cursor:not-allowed}
+
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;z-index:400;box-shadow:var(--shadow-md);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;
+  font-weight:600;font-size:14px;z-index:400;box-shadow:var(--shadow-md);
+  opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{background:#1e293b;color:#fff}
 .toast.err{background:var(--red);color:#fff}
 .toast.wrn{background:var(--amber);color:#fff}
-/* SETUP GUIDE */
-.setup{background:#fff;border-radius:12px;padding:28px;max-width:660px;margin:0 auto;box-shadow:var(--shadow)}
-.setup h2{font-size:17px;font-weight:700;margin-bottom:16px;color:#1e293b}
-.setup ol{padding-left:20px;line-height:2;font-size:14px;color:#374151}
-.setup code{background:#f1f5f9;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px}
-.setup pre{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto;margin:12px 0;line-height:1.7}
+
+/* EMPTY */
 .empty{padding:48px;text-align:center;color:#94a3b8}
 .empty .ei{font-size:40px;margin-bottom:12px}
 </style>
@@ -177,17 +267,18 @@ tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
         </div>
       </div>
       <div class="hdr-btns">
-        <button class="btn btn-tab active" id="btnTable" onclick="switchView('table')">📋 Items List</button>
-        <button class="btn btn-tab" id="btnSummary" onclick="switchView('summary')">📊 Resort Summary</button>
+        <button class="btn btn-tab active" id="btnTable"   onclick="switchView('table')">📋 Items</button>
+        <button class="btn btn-tab"        id="btnInvoice" onclick="switchView('invoice')">🧾 By Invoice</button>
+        <button class="btn btn-tab"        id="btnSummary" onclick="switchView('summary')">📊 By Resort</button>
         <button class="btn btn-sync" onclick="loadData()" id="syncBtn">🔄 Refresh</button>
-        <button class="btn btn-add" onclick="openAddModal()">+ New Item</button>
+        <button class="btn btn-add"  onclick="openAddModal()">＋ New Item</button>
       </div>
     </div>
     <div class="stats-bar">
       <div class="stat"><div class="sl">Total Items</div><div class="sv" id="sItems">—</div></div>
       <div class="stat"><div class="sl">Total Amount</div><div class="sv" id="sAmt">—</div></div>
-      <div class="stat"><div class="sl">Resorts</div><div class="sv" id="sResorts">—</div></div>
       <div class="stat"><div class="sl">Invoices</div><div class="sv" id="sInv">—</div></div>
+      <div class="stat"><div class="sl">Resorts</div><div class="sv" id="sResorts">—</div></div>
     </div>
   </div>
 </div>
@@ -195,20 +286,32 @@ tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
 <div class="content">
   <!-- FILTER BAR -->
   <div class="fbar">
-    <div class="sw"><span class="si">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search items, codes, resorts, BO numbers…" oninput="handleSearch()"/>
+    <div class="sw">
+      <span class="si">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search items, codes, resorts, invoice numbers…" oninput="handleSearch()"/>
     </div>
-    <select class="fsel" id="resortFilter" onchange="applyFilters()"><option value="">All Resorts</option></select>
-    <select class="fsel" id="invoiceFilter" onchange="applyFilters()"><option value="">All Invoices / BO No.</option></select>
+    <select class="fsel" id="invoiceFilter"  onchange="applyFilters()"><option value="">All Invoices</option></select>
+    <select class="fsel" id="resortFilter"   onchange="applyFilters()"><option value="">All Resorts</option></select>
+    <select class="fsel" id="itemCodeFilter" onchange="applyFilters()"><option value="">All Item Codes</option></select>
     <button class="btn-clr" id="clearBtn" onclick="clearFilters()">✕ Clear</button>
   </div>
 
   <!-- TABLE VIEW -->
   <div id="viewTable">
     <div id="tableArea">
-      <div class="loader"><div class="spinner"></div><span>Loading data from Google Sheets…</span></div>
+      <div class="loader"><div class="spinner"></div><span>Loading from Google Sheets…</span></div>
     </div>
     <div class="pag" id="pagination"></div>
+  </div>
+
+  <!-- INVOICE VIEW -->
+  <div id="viewInvoice" style="display:none">
+    <div class="inv-toolbar">
+      <span class="inv-toolbar-info" id="invToolbarInfo"></span>
+      <button class="btn-expall" onclick="expandAll(true)">Expand All</button>
+      <button class="btn-expall" onclick="expandAll(false)">Collapse All</button>
+    </div>
+    <div class="inv-list" id="invoiceList"></div>
   </div>
 
   <!-- SUMMARY VIEW -->
@@ -217,12 +320,15 @@ tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
   </div>
 </div>
 
-<!-- ADD MODAL -->
+<!-- ADD / EDIT MODAL -->
 <div class="overlay" id="formOverlay">
   <div class="modal">
-    <div class="mh"><h2 id="formTitle">+ Add New Item</h2>
-      <button class="mclose" onclick="closeFormModal()">✕</button></div>
-    <div class="fgrid" id="formFields"></div>
+    <div class="mh">
+      <h2 id="formTitle">＋ Add New Item</h2>
+      <button class="mclose" onclick="closeFormModal()">✕</button>
+    </div>
+    <p class="msub" id="formSubtitle"></p>
+    <div id="formFields"></div>
     <div class="mact">
       <button class="btn-sub" id="formSubmitBtn" onclick="submitForm()">Add Item</button>
       <button class="btn-can" onclick="closeFormModal()">Cancel</button>
@@ -230,15 +336,15 @@ tfoot td{padding:9px 11px;font-weight:700;color:var(--green)}
   </div>
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
+<!-- DELETE CONFIRM -->
 <div class="overlay" id="delOverlay">
   <div class="dmodal">
     <div class="di">🗑️</div>
     <h3>Delete this item?</h3>
-    <p id="delDesc">This will permanently remove the row from your Google Sheet.</p>
+    <p id="delDesc"></p>
     <div class="dact">
       <button class="btn-dodel" id="delConfirmBtn" onclick="confirmDelete()">Yes, Delete</button>
-      <button class="btn-can" onclick="closeDelModal()">Cancel</button>
+      <button class="btn-can"   onclick="closeDelModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -252,59 +358,89 @@ let allData=[], headers=[], filtered=[];
 let currentPage=1, currentView='table';
 let sortField='', sortDir='asc';
 let editingRowNum=null, pendingDeleteRow=null;
+let expandedInvoices=new Set();
+let CK={};   // column keys (set after load)
+let formMode='add', editRowData=null;
 
+const PAGE_SIZE=40;
 const PAL=['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899',
   '#06b6d4','#84cc16','#f97316','#6366f1','#14b8a6','#f43f5e','#a855f7',
   '#3b82f6','#22c55e','#e11d48','#7c3aed','#0891b2','#65a30d','#ea580c'];
 const RC={};
 function rc(r){if(!RC[r])RC[r]=PAL[Object.keys(RC).length%PAL.length];return RC[r];}
 
-const PAGE_SIZE=30;
-function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){
+  return String(s??'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 function pAmt(v){return parseFloat(String(v??'').replace(/[^0-9.-]/g,''))||0;}
-function fAmt(v){const n=pAmt(v);return n?'LKR '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';}
+function fAmt(v){
+  const n=pAmt(v);
+  return n?'LKR '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}):'—';
+}
 function fNum(v){const n=parseFloat(v)||0;return n?n.toLocaleString():'—';}
-
 function toast(msg,type='ok'){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className='toast show '+type;
   clearTimeout(el._t);el._t=setTimeout(()=>el.className='toast',3200);
 }
 
+// Exact match first, then fuzzy
+function colExact(name){
+  return headers.find(h=>h.toLowerCase()===name.toLowerCase())||'';
+}
 function colKey(...candidates){
   for(const c of candidates){
-    const k=headers.find(h=>h.toLowerCase().replace(/[\s_-]/g,'').includes(c.toLowerCase().replace(/[\s_-]/g,'')));
+    const norm=s=>s.toLowerCase().replace(/[\s_()\-]/g,'');
+    const k=headers.find(h=>norm(h).includes(norm(c)));
     if(k)return k;
   }
-  return headers[0]||'';
+  return '';
 }
 
-// ── LOAD DATA via fetch (follows redirects, works on all devices) ──
+function initKeys(){
+  // Use exact matches for known sheet columns, fallback to fuzzy
+  CK={
+    no:       colExact('No')           || colKey('no'),
+    bo:       colExact('BO No')        || colKey('bono','invoice'),
+    resort:   colExact('Resort')       || colKey('resort','customer','client'),
+    itemCode: colExact('Item Code')    || colKey('itemcode','code'),
+    item:     colExact('Item')         || colKey('item','description','name','product'),
+    qty:      colExact('Qty')          || colKey('qty','quantity'),
+    rate:     colExact('Rate (LKR)')   || colKey('rate'),
+    amount:   colExact('Amount (LKR)')|| colKey('amount'),
+  };
+}
+
+// ─── LOAD DATA ───────────────────────────────────────────────────────────────
 function loadData(){
-  document.getElementById('syncStatus').textContent='Syncing with Google Sheets...';
-  document.getElementById('syncBtn').textContent='Syncing...';
+  document.getElementById('syncStatus').textContent='Syncing with Google Sheets…';
+  document.getElementById('syncBtn').textContent='Syncing…';
   document.getElementById('syncBtn').disabled=true;
 
-  fetch(API+'?action=getAll&_t='+Date.now(), {method:'GET', redirect:'follow'})
+  fetch(API+'?action=getAll&_t='+Date.now(),{method:'GET',redirect:'follow'})
     .then(r=>r.text())
     .then(txt=>{
       let data;
       const m=txt.match(/^[^(]+\(([\s\S]*)\)\s*;?\s*$/);
-      try{ data=JSON.parse(m?m[1]:txt); }
-      catch(e){ throw new Error('Bad response from Apps Script'); }
+      try{data=JSON.parse(m?m[1]:txt);}
+      catch(e){throw new Error('Bad response from Apps Script');}
       if(data.error){showConnError(data.error);return;}
       headers=data.headers||[];
       allData=data.rows||[];
-      const rk=colKey('resort','customer','client','entity');
-      allData.forEach(r=>{const v=r[rk];if(v)rc(String(v).trim());});
-      buildFilters();applyFilters();
-      const ts=new Date().toLocaleTimeString();
-      document.getElementById('syncStatus').textContent='Synced '+allData.length+' items - '+ts;
+      initKeys();
+      allData.forEach(r=>{const v=r[CK.resort];if(v)rc(String(v).trim());});
+      buildFilters();
+      applyFilters();
+      document.getElementById('syncStatus').textContent=
+        'Synced '+allData.length+' items · '+new Date().toLocaleTimeString();
       toast('Loaded '+allData.length+' items from Google Sheets');
     })
-    .catch(e=>{ showConnError(e.message); })
+    .catch(e=>showConnError(e.message))
     .finally(()=>{
-      document.getElementById('syncBtn').textContent='Refresh';
+      document.getElementById('syncBtn').textContent='🔄 Refresh';
       document.getElementById('syncBtn').disabled=false;
     });
 }
@@ -313,55 +449,69 @@ function showConnError(msg){
   msg=msg||'Could not reach Google Apps Script.';
   document.getElementById('tableArea').innerHTML=`
     <div class="error-box">
-      <div class="ei">&#x26A0;&#xFE0F;</div>
-      <h3>Connection Failed</h3>
-      <p>${esc(msg)}</p>
-      <code>${esc(API)}</code>
+      <div class="ei">⚠️</div><h3>Connection Failed</h3>
+      <p>${esc(msg)}</p><code>${esc(API)}</code>
       <div style="margin-top:16px">
-        <button onclick="loadData()" style="padding:10px 20px;border-radius:8px;border:none;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px">Retry</button>
+        <button onclick="loadData()" style="padding:10px 20px;border-radius:8px;border:none;
+          background:var(--blue);color:#fff;cursor:pointer;font-family:inherit;font-weight:600">
+          Retry
+        </button>
       </div>
     </div>`;
   document.getElementById('syncStatus').textContent='Connection failed';
 }
 
-// ── FILTERS ──
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
 function buildFilters(){
-  const rk=colKey('resort','customer','client','entity');
-  const ik=colKey('invoice','bono','bo','no');
-  const resorts=[...new Set(allData.map(r=>String(r[rk]||'').trim()))].filter(Boolean).sort();
-  const invoices=[...new Set(allData.map(r=>String(r[ik]||'').trim()))].filter(Boolean).sort();
-  const rf=document.getElementById('resortFilter');
-  rf.innerHTML='<option value="">All Resorts</option>';
-  resorts.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;rf.appendChild(o);});
-  const ivf=document.getElementById('invoiceFilter');
-  ivf.innerHTML='<option value="">All Invoices / BO No.</option>';
-  invoices.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;ivf.appendChild(o);});
+  const resorts =[...new Set(allData.map(r=>String(r[CK.resort]  ||'').trim()))].filter(Boolean).sort();
+  const invoices=[...new Set(allData.map(r=>String(r[CK.bo]      ||'').trim()))].filter(Boolean).sort();
+  const codes   =[...new Set(allData.map(r=>String(r[CK.itemCode]||'').trim()))].filter(Boolean).sort();
+
+  const rebuild=(id,label,vals)=>{
+    const sel=document.getElementById(id);
+    const cur=sel.value;
+    sel.innerHTML=`<option value="">${label}</option>`;
+    vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;sel.appendChild(o);});
+    sel.value=cur;
+  };
+  rebuild('resortFilter',   'All Resorts',     resorts);
+  rebuild('invoiceFilter',  'All Invoices',    invoices);
+  rebuild('itemCodeFilter', 'All Item Codes',  codes);
 }
 
 function applyFilters(){
-  const q=document.getElementById('searchInput').value.toLowerCase().trim();
-  const rf=document.getElementById('resortFilter').value;
-  const ivf=document.getElementById('invoiceFilter').value;
-  const rk=colKey('resort','customer','client','entity');
-  const ik=colKey('invoice','bono','bo','no');
+  const q   =document.getElementById('searchInput').value.toLowerCase().trim();
+  const rf  =document.getElementById('resortFilter').value;
+  const ivf =document.getElementById('invoiceFilter').value;
+  const icf =document.getElementById('itemCodeFilter').value;
+
   filtered=allData.filter(r=>{
-    if(rf&&String(r[rk]||'').trim()!==rf)return false;
-    if(ivf&&String(r[ik]||'').trim()!==ivf)return false;
+    if(rf  && String(r[CK.resort]  ||'').trim()!==rf )return false;
+    if(ivf && String(r[CK.bo]      ||'').trim()!==ivf)return false;
+    if(icf && String(r[CK.itemCode]||'').trim()!==icf)return false;
     if(q){const row=Object.values(r).join(' ').toLowerCase();if(!row.includes(q))return false;}
     return true;
   });
+
   if(sortField){
     filtered.sort((a,b)=>{
-      let av=a[sortField]??'',bv=b[sortField]??'';
-      const an=parseFloat(av),bn=parseFloat(bv);
-      if(!isNaN(an)&&!isNaN(bn)){return sortDir==='asc'?an-bn:bn-an;}
-      return sortDir==='asc'?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av));
+      let av=a[sortField]??'', bv=b[sortField]??'';
+      const an=parseFloat(av), bn=parseFloat(bv);
+      if(!isNaN(an)&&!isNaN(bn))return sortDir==='asc'?an-bn:bn-an;
+      return sortDir==='asc'
+        ?String(av).localeCompare(String(bv))
+        :String(bv).localeCompare(String(av));
     });
   }
+
   currentPage=1;
   updateStats();
-  document.getElementById('clearBtn').style.display=(q||rf||ivf)?'block':'none';
-  if(currentView==='table')renderTable();else renderSummary();
+  const anyFilter=q||rf||ivf||icf;
+  document.getElementById('clearBtn').style.display=anyFilter?'block':'none';
+
+  if(currentView==='table')  renderTable();
+  else if(currentView==='invoice') renderInvoiceView();
+  else renderSummary();
 }
 
 function handleSearch(){applyFilters();}
@@ -369,23 +519,21 @@ function clearFilters(){
   document.getElementById('searchInput').value='';
   document.getElementById('resortFilter').value='';
   document.getElementById('invoiceFilter').value='';
+  document.getElementById('itemCodeFilter').value='';
   applyFilters();
 }
 
 function updateStats(){
-  const ak=colKey('amount');
-  const rk=colKey('resort','customer','client','entity');
-  const ik=colKey('invoice','bono','bo','no');
-  const total=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
-  const resorts=new Set(filtered.map(r=>String(r[rk]||'').trim()).filter(Boolean));
-  const invs=new Set(filtered.map(r=>String(r[ik]||'').trim()).filter(Boolean));
+  const total   =filtered.reduce((s,r)=>s+pAmt(r[CK.amount]),0);
+  const resorts =new Set(filtered.map(r=>String(r[CK.resort]||'').trim()).filter(Boolean));
+  const invs    =new Set(filtered.map(r=>String(r[CK.bo]||'').trim()).filter(Boolean));
   document.getElementById('sItems').textContent=filtered.length.toLocaleString();
-  document.getElementById('sAmt').textContent=total?'LKR '+Math.round(total/1000)+'K':'—';
+  document.getElementById('sAmt').textContent  =total?'LKR '+Math.round(total/1000)+'K':'—';
   document.getElementById('sResorts').textContent=resorts.size;
-  document.getElementById('sInv').textContent=invs.size;
+  document.getElementById('sInv').textContent   =invs.size;
 }
 
-// ── TABLE ──
+// ─── TABLE VIEW ──────────────────────────────────────────────────────────────
 function sortBy(field){
   if(sortField===field){sortDir=sortDir==='asc'?'desc':'asc';}
   else{sortField=field;sortDir='asc';}
@@ -393,161 +541,401 @@ function sortBy(field){
 }
 
 function renderTable(){
-  const ak=colKey('amount');
   const totalPages=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
   if(currentPage>totalPages)currentPage=totalPages;
   const start=(currentPage-1)*PAGE_SIZE;
   const page=filtered.slice(start,start+PAGE_SIZE);
 
   if(!filtered.length){
-    document.getElementById('tableArea').innerHTML='<div class="empty"><div class="ei">&#x1F50D;</div><p>No items match your filter.</p></div>';
-    document.getElementById('pagination').innerHTML='';return;
+    document.getElementById('tableArea').innerHTML=
+      '<div class="empty"><div class="ei">🔍</div><p>No items match your filters.</p></div>';
+    document.getElementById('pagination').innerHTML='';
+    return;
   }
 
-  const rk=colKey('resort','customer','client','entity');
-  const ik=colKey('invoice','bono','bo','no');
-  const dk=colKey('description','item','name','product');
-
   const arrow=f=>sortField===f?(sortDir==='asc'?' ▲':' ▼'):'';
-  const thead='<thead><tr>'+headers.map(h=>`<th onclick="sortBy('${esc(h)}')">${esc(h)}${arrow(h)}</th>`).join('')+'<th>Actions</th></tr></thead>';
+  const thead='<thead><tr>'+
+    headers.map(h=>`<th onclick="sortBy('${esc(h)}')">${esc(h)}${arrow(h)}</th>`).join('')+
+    '<th>Actions</th></tr></thead>';
 
-  const totalAmt=filtered.reduce((s,r)=>s+pAmt(r[ak]),0);
-  const tfoot=ak?`<tfoot><tr><td colspan="${headers.length}" style="text-align:right;font-weight:700">Total (filtered):</td><td class="ar">${fAmt(totalAmt)}</td><td></td></tr></tfoot>`:'';
+  const totalAmt=filtered.reduce((s,r)=>s+pAmt(r[CK.amount]),0);
+  const tfoot=CK.amount
+    ?`<tfoot><tr><td colspan="${headers.length}" style="text-align:right">
+        Total (${filtered.length} items):</td>
+       <td class="ar">${fAmt(totalAmt)}</td><td></td></tr></tfoot>`:'';
 
   const tbody='<tbody>'+page.map(r=>{
     const rn=r._row;
     const isEdit=editingRowNum===rn;
     const cells=headers.map(h=>{
       const v=r[h];
-      if(isEdit)return`<td><input class="einp" id="ei_${rn}_${esc(h)}" value="${esc(v)}"/></td>`;
-      if(h===rk)return`<td><div class="rcell"><div class="rdot" style="background:${rc(String(v||'').trim())}"></div><span class="rname">${esc(v)}</span></div></td>`;
-      if(h===ik)return v?`<td><span class="cbadge">${esc(v)}</span></td>`:`<td><span class="cnone">—</span></td>`;
-      if(h===ak)return`<td class="ar">${fAmt(v)}</td>`;
-      if(h===dk)return`<td><div class="idesc" title="${esc(v)}">${esc(v)}</div></td>`;
+      if(isEdit)
+        return`<td><input class="einp" id="ei_${rn}_${esc(h)}" value="${esc(v??'')}"/></td>`;
+      if(h===CK.resort)
+        return`<td><div class="rcell"><div class="rdot" style="background:${rc(String(v||'').trim())}"></div>
+               <span class="rname">${esc(v)}</span></div></td>`;
+      if(h===CK.bo)
+        return v
+          ?`<td><span class="cbadge" onclick="filterByInvoice('${esc(v)}')" title="Filter by this invoice">${esc(v)}</span></td>`
+          :`<td><span class="cnone">—</span></td>`;
+      if(h===CK.itemCode)
+        return v&&String(v).trim()&&String(v).trim().toUpperCase()!=='NO CODE'
+          ?`<td><span class="ibadge">${esc(v)}</span></td>`
+          :`<td><span class="cnone">NO CODE</span></td>`;
+      if(h===CK.amount) return`<td class="ar">${fAmt(v)}</td>`;
+      if(h===CK.item)   return`<td><div class="idesc" title="${esc(v)}">${esc(v??'')}</div></td>`;
       const n=pAmt(v);
-      if(n&&h!==dk&&String(v).trim()!=='')return`<td class="nr">${fNum(v)}</td>`;
-      return`<td>${esc(v)}</td>`;
+      if(n&&String(v||'').trim()!=='') return`<td class="nr">${fNum(v)}</td>`;
+      return`<td>${esc(v??'')}</td>`;
     }).join('');
-    const desc=String(r[dk]||r[headers[0]]||'').trim();
+
+    const desc=String(r[CK.item]||r[headers[0]]||'').trim();
     const acts=isEdit
-      ?`<td><div class="acts"><button class="bs" onclick="saveEdit(${rn})">Save</button><button class="bc" onclick="cancelEdit()">Cancel</button></div></td>`
-      :`<td><div class="acts"><button class="be" onclick="startEdit(${rn})">Edit</button><button class="bd" onclick="openDel(${rn},'${esc(desc)}')">Del</button></div></td>`;
+      ?`<td><div class="acts">
+          <button class="bs" onclick="saveEdit(${rn})">✓ Save</button>
+          <button class="bc" onclick="cancelEdit()">Cancel</button>
+        </div></td>`
+      :`<td><div class="acts">
+          <button class="be" onclick="startEdit(${rn})">Edit</button>
+          <button class="bd" onclick="openDel(${rn},'${esc(desc)}')">Del</button>
+        </div></td>`;
+
     return`<tr class="${isEdit?'erow':''}">${cells}${acts}</tr>`;
   }).join('')+'</tbody>';
 
-  document.getElementById('tableArea').innerHTML=`<div class="twrap"><div class="tscroll"><table>${thead}${tbody}${tfoot}</table></div></div>`;
+  document.getElementById('tableArea').innerHTML=
+    `<div class="twrap"><div class="tscroll"><table>${thead}${tbody}${tfoot}</table></div></div>`;
 
   // Pagination
   let pag='';
   if(totalPages>1){
-    pag+=`<button class="pg" onclick="goPage(1)" ${currentPage===1?'disabled':''}>&#x00AB;</button>`;
-    pag+=`<button class="pg" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&#x2039;</button>`;
-    const s=Math.max(1,currentPage-2),e=Math.min(totalPages,currentPage+2);
-    for(let i=s;i<=e;i++)pag+=`<button class="pg${i===currentPage?' act':''}" onclick="goPage(${i})">${i}</button>`;
-    pag+=`<button class="pg" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>&#x203A;</button>`;
-    pag+=`<button class="pg" onclick="goPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>&#x00BB;</button>`;
-    pag+=`<span class="pg-info">Page ${currentPage} of ${totalPages} (${filtered.length} items)</span>`;
+    pag+=`<button class="pg" onclick="goPage(1)" ${currentPage===1?'disabled':''}>«</button>`;
+    pag+=`<button class="pg" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+    const s=Math.max(1,currentPage-2), e=Math.min(totalPages,currentPage+2);
+    for(let i=s;i<=e;i++)
+      pag+=`<button class="pg${i===currentPage?' act':''}" onclick="goPage(${i})">${i}</button>`;
+    pag+=`<button class="pg" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+    pag+=`<button class="pg" onclick="goPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>»</button>`;
+    pag+=`<span class="pg-info">Page ${currentPage} of ${totalPages} · ${filtered.length} items</span>`;
   }
   document.getElementById('pagination').innerHTML=pag;
 }
 
 function goPage(p){currentPage=p;renderTable();}
-function startEdit(rn){editingRowNum=rn;renderTable();}
-function cancelEdit(){editingRowNum=null;renderTable();}
-function saveEdit(rn){
-  const row=allData.find(r=>r._row===rn);if(!row)return;
-  const updated={};
-  headers.forEach(h=>{const inp=document.getElementById('ei_'+rn+'_'+h);if(inp)updated[h]=inp.value;});
-  Object.assign(row,updated);editingRowNum=null;applyFilters();
-  toast('Saving...','wrn');
-  apiCall({action:'update',row:rn,data:updated})
-    .then(()=>toast('Row updated!','ok'))
-    .catch(e=>{toast('Update failed: '+e.message,'err');loadData();});
+
+function filterByInvoice(boNo){
+  document.getElementById('invoiceFilter').value=boNo;
+  switchView('invoice');
+  applyFilters();
 }
 
-// ── SUMMARY ──
-function renderSummary(){
-  const rk=colKey('resort','customer','client','entity');
-  const ak=colKey('amount');
-  const ik=colKey('invoice','bono','bo','no');
-  const map={};
+// ─── INVOICE VIEW ─────────────────────────────────────────────────────────────
+function renderInvoiceView(){
+  const grouped={};
   filtered.forEach(r=>{
-    const res=String(r[rk]||'Unknown').trim();
-    if(!map[res])map[res]={resort:res,items:0,amount:0,invs:new Set()};
-    map[res].items++;map[res].amount+=pAmt(r[ak]);
-    const iv=r[ik];if(iv)map[res].invs.add(iv);
+    const bo=String(r[CK.bo]||'(No Invoice)').trim();
+    if(!grouped[bo])grouped[bo]={rows:[],amount:0,resorts:new Set()};
+    grouped[bo].rows.push(r);
+    grouped[bo].amount+=pAmt(r[CK.amount]);
+    const res=String(r[CK.resort]||'').trim();
+    if(res)grouped[bo].resorts.add(res);
   });
-  const list=Object.values(map).sort((a,b)=>b.amount-a.amount);
-  const mx=list[0]?.amount||1;
-  document.getElementById('summaryGrid').innerHTML=list.map(r=>{
-    const c=rc(r.resort);const pct=Math.min(100,(r.amount/mx)*100);
-    return`<div class="ccard" onclick="drillResort('${esc(r.resort)}')"
-      onmouseenter="this.style.borderColor='${c}'"
-      onmouseleave="this.style.borderColor='transparent'">
-      <div class="ch"><div class="cdot" style="background:${c}"></div><div class="cn">${esc(r.resort)}</div></div>
-      <div class="cstats">
-        <div class="cst"><div class="sl">Items</div><div class="sv">${r.items}</div></div>
-        <div class="cst"><div class="sl">Orders</div><div class="sv">${r.invs.size}</div></div>
-        <div class="camt"><div class="sl">Total</div><div class="sv">LKR ${(r.amount/1000).toFixed(0)}K</div></div>
+
+  const invoices=Object.keys(grouped).sort();
+  if(!invoices.length){
+    document.getElementById('invoiceList').innerHTML=
+      '<div class="empty"><div class="ei">🔍</div><p>No invoices match your filters.</p></div>';
+    document.getElementById('invToolbarInfo').textContent='';
+    return;
+  }
+
+  const totalAmt=Object.values(grouped).reduce((s,g)=>s+g.amount,0);
+  document.getElementById('invToolbarInfo').textContent=
+    invoices.length+' invoice'+(invoices.length!==1?'s':'')+' · '+filtered.length+' items · '+fAmt(totalAmt);
+
+  document.getElementById('invoiceList').innerHTML=invoices.map(bo=>{
+    const g=grouped[bo];
+    const isOpen=expandedInvoices.has(bo);
+    const resortDots=[...g.resorts].map(res=>
+      `<span style="display:inline-flex;align-items:center;gap:3px;margin-right:5px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${rc(res)};display:inline-block"></span>
+        <span style="font-size:11px;color:#475569">${esc(res)}</span>
+      </span>`).join('');
+
+    const rowsHtml=g.rows.map(r=>{
+      const rn=r._row;
+      const ic=String(r[CK.itemCode]||'').trim();
+      const hasCode=ic&&ic.toUpperCase()!=='NO CODE';
+      return`<tr>
+        <td>${hasCode?`<span class="ibadge">${esc(ic)}</span>`:`<span class="cnone">—</span>`}</td>
+        <td><div class="idesc" style="max-width:260px" title="${esc(r[CK.item])}">${esc(r[CK.item]||'')}</div></td>
+        <td><div class="rcell">
+          <div class="rdot" style="background:${rc(String(r[CK.resort]||'').trim())}"></div>
+          <span>${esc(r[CK.resort]||'')}</span>
+        </div></td>
+        <td class="nr">${fNum(r[CK.qty])}</td>
+        <td class="nr">${fAmt(r[CK.rate])}</td>
+        <td class="ar">${fAmt(r[CK.amount])}</td>
+        <td><div class="acts">
+          <button class="be" onclick="startEdit(${rn});switchView('table')">Edit</button>
+          <button class="bd" onclick="openDel(${rn},'${esc(String(r[CK.item]||''))}')">Del</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    return`<div class="inv-card${isOpen?' expanded':''}" id="invc_${esc(bo)}">
+      <div class="inv-hdr" onclick="toggleInvoice('${esc(bo)}')">
+        <span class="inv-arrow${isOpen?' open':''}">▼</span>
+        <span class="inv-no">${esc(bo)}</span>
+        <span class="inv-resorts">${resortDots}</span>
+        <div class="inv-meta">
+          <div class="inv-m"><div class="ml">Items</div><div class="mv">${g.rows.length}</div></div>
+          <div class="inv-m"><div class="ml">Resorts</div><div class="mv">${g.resorts.size}</div></div>
+          <div class="inv-amt">${fAmt(g.amount)}</div>
+        </div>
       </div>
-      <div class="cbar"><div class="cbarfill" style="width:${pct}%;background:${c}"></div></div>
+      <div class="inv-body${isOpen?' open':''}">
+        <table>
+          <thead><tr>
+            <th>Item Code</th><th>Item</th><th>Resort</th>
+            <th style="text-align:right">Qty</th>
+            <th style="text-align:right">Rate (LKR)</th>
+            <th style="text-align:right">Amount (LKR)</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+        <div class="inv-subtotal">
+          <span class="ist">${g.rows.length} items · ${g.resorts.size} resort${g.resorts.size!==1?'s':''}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="inv-add" onclick="openAddModal('${esc(bo)}')">＋ Add Item to this Invoice</button>
+            <span class="isa">Subtotal: ${fAmt(g.amount)}</span>
+          </div>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
 
+function toggleInvoice(bo){
+  if(expandedInvoices.has(bo))expandedInvoices.delete(bo);
+  else expandedInvoices.add(bo);
+  const card=document.getElementById('invc_'+bo);
+  if(!card)return;
+  card.querySelector('.inv-arrow').classList.toggle('open',expandedInvoices.has(bo));
+  card.querySelector('.inv-body').classList.toggle('open',expandedInvoices.has(bo));
+  card.classList.toggle('expanded',expandedInvoices.has(bo));
+}
+
+function expandAll(open){
+  const invoices=filtered.map(r=>String(r[CK.bo]||'').trim()).filter(Boolean);
+  invoices.forEach(bo=>{
+    if(open)expandedInvoices.add(bo);else expandedInvoices.delete(bo);
+  });
+  renderInvoiceView();
+}
+
+// ─── SUMMARY VIEW ─────────────────────────────────────────────────────────────
+function renderSummary(){
+  const map={};
+  filtered.forEach(r=>{
+    const res=String(r[CK.resort]||'Unknown').trim();
+    if(!map[res])map[res]={resort:res,items:0,amount:0,invs:new Set()};
+    map[res].items++;
+    map[res].amount+=pAmt(r[CK.amount]);
+    const iv=r[CK.bo];if(iv)map[res].invs.add(iv);
+  });
+  const list=Object.values(map).sort((a,b)=>b.amount-a.amount);
+  const mx=list[0]?.amount||1;
+  document.getElementById('summaryGrid').innerHTML=list.length
+    ?list.map(r=>{
+        const c=rc(r.resort);
+        const pct=Math.min(100,(r.amount/mx)*100);
+        return`<div class="ccard" onclick="drillResort('${esc(r.resort)}')"
+          onmouseenter="this.style.borderColor='${c}'"
+          onmouseleave="this.style.borderColor='transparent'">
+          <div class="ch"><div class="cdot" style="background:${c}"></div>
+            <div class="cn">${esc(r.resort)}</div></div>
+          <div class="cstats">
+            <div class="cst"><div class="sl">Items</div><div class="sv">${r.items}</div></div>
+            <div class="cst"><div class="sl">Invoices</div><div class="sv">${r.invs.size}</div></div>
+            <div class="camt"><div class="sl">Total</div>
+              <div class="sv">LKR ${(r.amount/1000).toFixed(0)}K</div></div>
+          </div>
+          <div class="cbar"><div class="cbarfill" style="width:${pct}%;background:${c}"></div></div>
+        </div>`;
+      }).join('')
+    :'<div class="empty"><div class="ei">🔍</div><p>No data to display.</p></div>';
+}
+
 function drillResort(resort){
   document.getElementById('resortFilter').value=resort;
-  switchView('table');applyFilters();
+  switchView('invoice');
+  applyFilters();
 }
 
 function switchView(v){
   currentView=v;
-  document.getElementById('viewTable').style.display=v==='table'?'block':'none';
-  document.getElementById('viewSummary').style.display=v==='summary'?'block':'none';
-  document.getElementById('btnTable').classList.toggle('active',v==='table');
-  document.getElementById('btnSummary').classList.toggle('active',v==='summary');
-  if(v==='summary')renderSummary();else renderTable();
+  ['Table','Invoice','Summary'].forEach(n=>{
+    const el=document.getElementById('view'+n);
+    const btn=document.getElementById('btn'+n);
+    if(el)el.style.display=(v.toLowerCase()===n.toLowerCase())?'block':'none';
+    if(btn)btn.classList.toggle('active',v.toLowerCase()===n.toLowerCase());
+  });
+  if(v==='table')renderTable();
+  else if(v==='invoice')renderInvoiceView();
+  else renderSummary();
 }
 
-// ── ADD MODAL ──
-function openAddModal(){
-  document.getElementById('formTitle').textContent='+ Add New Item';
+// ─── ADD MODAL (structured, smart) ───────────────────────────────────────────
+function openAddModal(prefillBo=''){
+  formMode='add';editRowData=null;
+  document.getElementById('formTitle').textContent='＋ Add New Item';
+  document.getElementById('formSubtitle').textContent='Fill in the details below to add a new line item.';
   document.getElementById('formSubmitBtn').textContent='Add Item';
-  document.getElementById('formFields').innerHTML=headers.map(h=>`
-    <div class="frow"><label>${esc(h)}</label><input id="ff_${esc(h)}" placeholder="${esc(h)}"/></div>`).join('');
+
+  const bos    =[...new Set(allData.map(r=>String(r[CK.bo]    ||'').trim()))].filter(Boolean).sort();
+  const resorts=[...new Set(allData.map(r=>String(r[CK.resort]||'').trim()))].filter(Boolean).sort();
+
+  document.getElementById('formFields').innerHTML=`
+    <div class="msec">📋 Invoice</div>
+    <div class="fgrid fc1">
+      <div class="frow">
+        <label>BO No — Invoice Number *</label>
+        <input id="ff_bo" list="dl_bo" placeholder="e.g. BO 24-A-0023 (type or pick existing)"
+          autocomplete="off" value="${esc(prefillBo)}" style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600"/>
+        <datalist id="dl_bo">${bos.map(v=>`<option value="${esc(v)}">`).join('')}</datalist>
+        <div class="fhint">Pick an existing invoice from the list, or type a new number to create a new invoice</div>
+      </div>
+    </div>
+
+    <div class="msec">🏨 Item Details</div>
+    <div class="fgrid">
+      <div class="frow fspan">
+        <label>Resort *</label>
+        <input id="ff_resort" list="dl_resort" placeholder="Select or type resort name" autocomplete="off"/>
+        <datalist id="dl_resort">${resorts.map(v=>`<option value="${esc(v)}">`).join('')}</datalist>
+      </div>
+      <div class="frow">
+        <label>Item Code</label>
+        <input id="ff_itemcode" placeholder="e.g. CHM0071 (or leave blank)"/>
+      </div>
+      <div class="frow">
+        <label>Item Name *</label>
+        <input id="ff_item" placeholder="e.g. Key Card Holder"/>
+      </div>
+    </div>
+
+    <div class="msec">💰 Pricing</div>
+    <div class="fgrid fc3">
+      <div class="frow">
+        <label>Qty</label>
+        <input id="ff_qty" type="number" min="0" placeholder="e.g. 1000" oninput="autoCalcAmount()"/>
+      </div>
+      <div class="frow">
+        <label>Rate (LKR)</label>
+        <input id="ff_rate" type="number" min="0" step="0.01" placeholder="e.g. 24.00" oninput="autoCalcAmount()"/>
+      </div>
+      <div class="frow">
+        <label>Amount (LKR)</label>
+        <input id="ff_amount" type="number" class="auto-calc" placeholder="Auto: Qty × Rate"/>
+        <div class="fhint">Auto-filled · editable</div>
+      </div>
+    </div>`;
+
   document.getElementById('formOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('ff_bo').focus(),80);
 }
+
+function autoCalcAmount(){
+  const qty =parseFloat(document.getElementById('ff_qty')?.value)||0;
+  const rate=parseFloat(document.getElementById('ff_rate')?.value)||0;
+  if(qty&&rate){
+    const el=document.getElementById('ff_amount');
+    if(el)el.value=(qty*rate).toFixed(2);
+  }
+}
+
 function closeFormModal(){document.getElementById('formOverlay').classList.remove('open');}
+
 function submitForm(){
-  const data={};let hasVal=false;
-  headers.forEach(h=>{const v=document.getElementById('ff_'+h)?.value||'';data[h]=v;if(v)hasVal=true;});
-  if(!hasVal){toast('Please fill in at least one field','wrn');return;}
   const btn=document.getElementById('formSubmitBtn');
-  btn.disabled=true;btn.textContent='Adding...';
+  const v=id=>document.getElementById(id)?.value?.trim()||'';
+
+  const bo      =v('ff_bo');
+  const resort  =v('ff_resort');
+  const itemCode=v('ff_itemcode');
+  const item    =v('ff_item');
+  const qty     =v('ff_qty');
+  const rate    =v('ff_rate');
+  let   amount  =v('ff_amount');
+
+  if(!bo){toast('BO No (Invoice Number) is required','wrn');document.getElementById('ff_bo').focus();return;}
+  if(!resort){toast('Resort is required','wrn');document.getElementById('ff_resort').focus();return;}
+  if(!item){toast('Item Name is required','wrn');document.getElementById('ff_item').focus();return;}
+
+  // Auto-compute amount if blank
+  if(!amount&&qty&&rate) amount=(parseFloat(qty)*parseFloat(rate)).toFixed(2);
+
+  // Auto-assign No
+  const maxNo=allData.reduce((m,r)=>Math.max(m,parseInt(r[CK.no])||0),0);
+
+  const data={};
+  if(CK.no)       data[CK.no]       = maxNo+1;
+  if(CK.bo)       data[CK.bo]       = bo;
+  if(CK.resort)   data[CK.resort]   = resort;
+  if(CK.itemCode) data[CK.itemCode] = itemCode||'NO CODE';
+  if(CK.item)     data[CK.item]     = item;
+  if(CK.qty)      data[CK.qty]      = qty;
+  if(CK.rate)     data[CK.rate]     = rate;
+  if(CK.amount)   data[CK.amount]   = amount;
+
+  btn.disabled=true;btn.textContent='Adding…';
   apiCall({action:'add',data})
-    .then(()=>{closeFormModal();toast('Item added! Refreshing...','ok');setTimeout(loadData,1200);})
+    .then(()=>{
+      closeFormModal();
+      toast('Item added! Refreshing…','ok');
+      setTimeout(loadData,1200);
+    })
     .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Add Item';});
 }
 
-// ── DELETE ──
+// ─── INLINE EDIT (table) ─────────────────────────────────────────────────────
+function startEdit(rn){editingRowNum=rn;if(currentView!=='table')switchView('table');else renderTable();}
+function cancelEdit(){editingRowNum=null;renderTable();}
+function saveEdit(rn){
+  const row=allData.find(r=>r._row===rn);if(!row)return;
+  const updated={};
+  headers.forEach(h=>{
+    const inp=document.getElementById('ei_'+rn+'_'+h);
+    if(inp)updated[h]=inp.value;
+  });
+  Object.assign(row,updated);editingRowNum=null;applyFilters();
+  toast('Saving…','wrn');
+  apiCall({action:'update',row:rn,data:updated})
+    .then(()=>toast('Row updated ✓','ok'))
+    .catch(e=>{toast('Update failed: '+e.message,'err');loadData();});
+}
+
+// ─── DELETE ──────────────────────────────────────────────────────────────────
 function openDel(rn,desc){
   pendingDeleteRow=rn;
-  document.getElementById('delDesc').textContent='"'+desc+'" will be permanently removed.';
+  document.getElementById('delDesc').textContent='"'+desc+'" will be permanently removed from the sheet.';
   document.getElementById('delOverlay').classList.add('open');
 }
 function closeDelModal(){document.getElementById('delOverlay').classList.remove('open');pendingDeleteRow=null;}
 function confirmDelete(){
   if(!pendingDeleteRow)return;
   const btn=document.getElementById('delConfirmBtn');
-  btn.disabled=true;btn.textContent='Deleting...';
+  btn.disabled=true;btn.textContent='Deleting…';
   apiCall({action:'delete',row:pendingDeleteRow})
-    .then(()=>{closeDelModal();toast('Row deleted!','ok');loadData();})
+    .then(()=>{closeDelModal();toast('Row deleted','ok');loadData();})
     .catch(e=>toast('Failed: '+e.message,'err'))
     .finally(()=>{btn.disabled=false;btn.textContent='Yes, Delete';});
 }
 
-// ── API CALL via fetch GET (works everywhere, follows redirects) ──
+// ─── API CALL (GET, follows redirects) ───────────────────────────────────────
 function apiCall(payload){
   let url=API+'?action='+encodeURIComponent(payload.action);
   if(payload.row!=null) url+='&row='+encodeURIComponent(payload.row);
@@ -562,10 +950,12 @@ function apiCall(payload){
     });
 }
 
-// ── EVENTS ──
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
 document.getElementById('formOverlay').addEventListener('click',function(e){if(e.target===this)closeFormModal();});
-document.getElementById('delOverlay').addEventListener('click',function(e){if(e.target===this)closeDelModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFormModal();closeDelModal();}});
+document.getElementById('delOverlay').addEventListener('click', function(e){if(e.target===this)closeDelModal();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeFormModal();closeDelModal();}
+});
 window.addEventListener('load',loadData);
 </script>
 </body>
